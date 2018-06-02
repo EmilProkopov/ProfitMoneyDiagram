@@ -32,7 +32,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 
-public class WorkerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
+public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
 
     private static final String LOGTAG = "AsyncTask";
     private static int updateRateSeconds = 10;
@@ -40,7 +40,7 @@ public class WorkerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
     private WeakReference<AppCompatActivity> activityReference;
 
 
-    public WorkerAsyncTask(AppCompatActivity activity) {
+    public LoggerAsyncTask(AppCompatActivity activity) {
 
         this.activityReference = new WeakReference<>(activity);
         Log.d(LOGTAG, "WORKER ASYNCTASK STARTED");
@@ -48,110 +48,6 @@ public class WorkerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
 
     @Override
     protected LabResponse doInBackground(Void... params) {
-
-        /*OrderBookGetter getter = new OrderBookGetter();
-        CompiledOrderBook orderBook = getter.getCompiledOrderBook(1000);
-
-        Double profit = 0.0;
-        Double amount = 0.0;
-        Integer tradeCnt = 0;
-        ArrayList <Double> profitPoints = new ArrayList<>();
-        ArrayList <Double> amountPoints = new ArrayList<>();
-        Double alpha = 0.1;
-        Double optimalAmount = 0.0;
-        Double optimalProfit = 0.0;
-        Integer num = 0;
-        Boolean ok = true;
-
-        int bx=0, ax = 0;
-
-        OutputDataSet outputDataSet = new OutputDataSet();
-
-        while((ax < orderBook.getAsks().size())
-                && (bx < orderBook.getBids().size())
-                && (orderBook.getBids().get(bx).getPrice() > orderBook.getAsks().get(ax).getPrice())) {
-
-
-
-            Double bidVol = orderBook.getBids().get(bx).getAmount();
-            Double askVol = orderBook.getAsks().get(ax).getAmount();
-            if (bidVol.equals(0.0)) {
-                bx += 1;
-                continue;
-            }
-            if (askVol.equals(0.0)) {
-                ax += 1;
-                continue;
-            }
-
-            Double m = min(bidVol, askVol);
-            Double currentProfit = (orderBook.getBids().get(bx).getPrice()
-                    - orderBook.getAsks().get(ax).getPrice()) * m;
-
-            profit += currentProfit;
-            amount += orderBook.getAsks().get(ax).getPrice() * m;
-
-            profitPoints.add(profit);
-            amountPoints.add(amount);
-            Double oldBidAmount = orderBook.getBids().get(bx).getAmount();
-            Double oldAskAmount = orderBook.getAsks().get(ax).getAmount();
-            orderBook.getBids().get(bx).setAmount(oldBidAmount - m);
-            orderBook.getAsks().get(ax).setAmount(oldAskAmount - m);
-            tradeCnt += 1;
-
-            num += 1;
-
-            Double prevAmount = null;
-            Double prevProfit = null;
-            Double firstK = null;
-
-            if (num.equals(1)) {
-                prevAmount = amount;
-                prevProfit = profit;
-            }
-            else if (num.equals(2)) {
-                firstK = (profit - prevProfit) / (amount - prevAmount);
-                prevAmount = amount;
-                prevProfit = profit;
-            }
-            else {
-                Double k = (profit - prevProfit) / (amount - prevAmount);
-                if (k / firstK >= alpha) {
-                    optimalAmount = amount;
-                    optimalProfit = profit;
-                } else {
-                    ok = false;
-                }
-                if (ok) {
-                    bid_exch = bids[bx][2]
-                    if bid_exch in bid_orders:
-                    bid_orders[bid_exch][0] = min(bid_orders[bid_exch][0], bids[bx][0])
-                    bid_orders[bid_exch][1] += m
-                    else:
-                    bid_orders[bid_exch] = [bids[bx][0], m]
-                    ask_exch = asks[ax][2]
-                    if ask_exch in ask_orders:
-                    ask_orders[ask_exch][0] = max(ask_orders[ask_exch][0], asks[ax][0])
-                    ask_orders[ask_exch][1] += m
-                    else:
-                    ask_orders[ask_exch] = [asks[ax][0], m]
-                    int OMG = 42;
-                }
-                prevAmount = amount;
-                prevProfit = profit;
-            }
-            ax++;
-            bx++;
-        }
-
-
-        outputDataSet.setProfit(profit);
-        outputDataSet.setOptimalAmount(amount);
-        outputDataSet.setOptimalProfit(profit);
-        outputDataSet.setAmountPoints(amountPoints);
-        outputDataSet.setProfitPoints(profitPoints);
-
-        return outputDataSet;*/
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://logger-mongo.azurewebsites.net") //Базовая часть адреса

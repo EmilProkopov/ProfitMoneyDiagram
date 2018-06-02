@@ -46,14 +46,15 @@
         android:padding="20dp"
         android:textAlignment="center"
         android:textColor="@color/colorPrimary"
-        android:textSize="45sp"
+        android:textSize="35sp"
         tools:text="0.0 USD" />
 
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/diagram"
         android:layout_width="match_parent"
-        android:layout_height="250dp" />
+        android:layout_height="250dp"
+        android:padding="10dp"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/iknowdaway"

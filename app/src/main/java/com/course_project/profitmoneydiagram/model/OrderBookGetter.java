@@ -1,4 +1,4 @@
-package com.course_project.profitmoneydiagram.asynctasks;
+package com.course_project.profitmoneydiagram.model;
 
 import android.util.Log;
 

@@ -5,7 +5,7 @@ package com.course_project.profitmoneydiagram.model;
 public class PriceAmountPair {
 
     private Double price;
-    private double amount;
+    private Double amount;
     private String market;
 
     public Double getPrice() {
