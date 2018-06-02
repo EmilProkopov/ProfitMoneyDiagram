@@ -13,6 +13,9 @@ import android.widget.TextView;
 import com.course_project.profitmoneydiagram.R;
 import com.course_project.profitmoneydiagram.asynctasks.WorkerAsyncTask;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
@@ -25,5 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
         WorkerAsyncTask at = new WorkerAsyncTask(this);
         at.execute();
+        ExecutorService executorService = Executors.newFixedThreadPool(7);
+        at.executeOnExecutor(executorService);
     }
 }

@@ -1,86 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    tools:context="com.course_project.profitmoneydiagram.ui.MainActivity"
-    android:id="@+id/main_layout">
+    tools:context="com.course_project.profitmoneydiagram.ui.MainActivity">
 
-
-    <TextView
-        android:id="@+id/exchange_values"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.05"
-        android:background="@color/colorPrimaryDark"
-        android:text="BTC/USDT"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        android:textColor="@color/colorPrimary"/>
+        android:layout_height="?actionBarSize"
+        android:background="@color/colorPrimaryDark">
 
+        <FrameLayout
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="BTC/USDT"
+                android:textSize="18sp"
+                android:gravity="center"
+                android:textColor="@color/colorPrimary"/>
+
+            <ImageButton
+                android:id="@+id/settings_btn"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="end"
+                android:background="@color/colorPrimaryDark"
+                app:srcCompat="@drawable/ic_settings_black_24dp" />
+        </FrameLayout>
+
+    </android.support.v7.widget.Toolbar>
 
     <TextView
         android:id="@+id/profit_string"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.15"
-        android:text="0.0 USD"
-        android:textSize="45sp"
+        android:layout_height="wrap_content"
         android:background="@color/colorPrimaryDark"
+        android:padding="20dp"
         android:textAlignment="center"
-        android:textColor="@color/colorPrimary"/>
+        android:textColor="@color/colorPrimary"
+        android:textSize="45sp"
+        tools:text="0.0 USD" />
 
 
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/diagram"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.35" />
+        android:layout_height="250dp" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/iknowdaway"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.35"
+        android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
-        app:layoutManager="LinearLayoutManager"/>
+        app:layoutManager="LinearLayoutManager" />
 
-    <LinearLayout
-        android:id="@+id/bottom_buttons"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.1"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/update_btn"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.4"
-            android:textAlignment="center"
-            android:background="@color/colorAccent"
-            android:text="UPDATE" />
-
-        <Button
-            android:id="@+id/change_currency_btn"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.4"
-            android:textAlignment="center"
-            android:background="@color/colorAccent"
-            android:text="Change currency" />
-
-        <Button
-            android:id="@+id/settings_btn"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="0.2"
-            android:textAlignment="center"
-            android:background="@color/colorAccent"
-            android:text="Settings" />
-
-    </LinearLayout>
 
 </LinearLayout>
