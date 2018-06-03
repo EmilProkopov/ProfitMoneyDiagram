@@ -1,11 +1,16 @@
 package com.course_project.profitmoneydiagram.asynctasks;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Gravity;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.course_project.profitmoneydiagram.R;
 import com.course_project.profitmoneydiagram.api.MarketApi;
@@ -34,17 +39,49 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
 
-    private static final String LOGTAG = "AsyncTask";
+    private static final String LOGTAG = "LoggerAsyncTask";
     private static int updateRateSeconds = 10;
 
     private WeakReference<AppCompatActivity> activityReference;
-
+    private SharedPreferences sp;
+    private String currencyPair;
+    private String secondCurrency;
 
     public LoggerAsyncTask(AppCompatActivity activity) {
 
         this.activityReference = new WeakReference<>(activity);
-        Log.d(LOGTAG, "WORKER ASYNCTASK STARTED");
+
+        sp = PreferenceManager.getDefaultSharedPreferences(activityReference.get());
+
+        Log.d(LOGTAG, "Logger ASYNCTASK STARTED");
     }
+
+
+    private void showToast(String msg) {
+        Toast toast = Toast.makeText(activityReference.get().getApplicationContext(),
+                msg,
+                Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
+    }
+
+
+    private void updateUpdateRateSeconds () {
+
+        try {
+            updateRateSeconds = Integer.parseInt(sp.getString("update_rate","10"));
+        } catch (java.lang.RuntimeException e) {
+            Log.e(LOGTAG, "Wrong formated string: update rate");
+            updateRateSeconds = 10;
+        }
+    }
+
+    private void updateCurrencyPair () {
+
+            currencyPair = sp.getString("currency_pares","NotChosen/");
+            secondCurrency = currencyPair.split("/")[1];
+    }
+
 
     @Override
     protected LabResponse doInBackground(Void... params) {
@@ -65,6 +102,9 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
         LabResponse labResponse = null;
 
         while (!isCancelled()) {
+
+            updateUpdateRateSeconds();
+            updateCurrencyPair();
 
             try {
                 responseCall = api.getLabResponce("btc_usd");
@@ -93,6 +133,11 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
         super.onProgressUpdate(params);
         LabResponse response = params[0];
 
+        if(response == null) {
+            showToast("Bad Internet connection");
+            return;
+        }
+
         LineChart chart = (LineChart) activityReference.get().findViewById(R.id.diagram);
         List <Entry> chartEntries = new ArrayList<>();
 
@@ -111,7 +156,12 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
 
 
         ((TextView)activityReference.get().findViewById(R.id.profit_string))
-                .setText(Double.toString((float)Math.round(response.getProfit()*100)/100.0)+" USDT");
+                .setText(Double.toString((float)Math.round(response.getProfit()*100)/100.0)
+                        +" "+secondCurrency);
+        ((TextView)activityReference.get().findViewById(R.id.amount_string))
+                .setText(Double.toString((float)Math.round(response.getAmount()*100)/100.0)
+                        +" "+secondCurrency);
+        ((TextView)activityReference.get().findViewById(R.id.currency_pair)).setText(currencyPair);
 
 
         DealListData dldata = new DealListData(response.getOrders());

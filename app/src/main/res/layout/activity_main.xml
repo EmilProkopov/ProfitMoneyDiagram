@@ -20,9 +20,10 @@
             android:gravity="center_vertical">
 
             <TextView
+                android:id = "@+id/currency_pair"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="BTC/USDT"
+                tools:text="BTC/USDT"
                 android:textSize="18sp"
                 android:gravity="center"
                 android:textColor="@color/colorPrimary"/>
@@ -32,8 +33,10 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_gravity="end"
+                android:onClick="onClick1"
                 android:background="@color/colorPrimaryDark"
-                app:srcCompat="@drawable/ic_settings_black_24dp" />
+                app:srcCompat="@drawable/ic_settings_black_24dp"
+                android:contentDescription="Settings"/>
         </FrameLayout>
 
     </android.support.v7.widget.Toolbar>
@@ -43,11 +46,22 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimaryDark"
-        android:padding="20dp"
+        android:paddingTop="20dp"
         android:textAlignment="center"
         android:textColor="@color/colorPrimary"
         android:textSize="35sp"
-        tools:text="0.0 USD" />
+        tools:text="Profit: 0.0 USD" />
+
+    <TextView
+        android:id="@+id/amount_string"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimaryDark"
+        android:padding="10dp"
+        android:textAlignment="center"
+        android:textColor="@color/colorPrimary"
+        android:textSize="18sp"
+        tools:text="Amount: 0.0 USD" />
 
 
     <com.github.mikephil.charting.charts.LineChart
