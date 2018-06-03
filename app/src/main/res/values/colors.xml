@@ -3,4 +3,6 @@
     <color name="colorPrimary">#FFF</color>
     <color name="colorPrimaryDark">#000</color>
     <color name="colorAccent">#DDD</color>
+    <color name="diagramCircleOrdinary">#66F</color>
+    <color name="diagramCircleOptimal">#F00</color>
 </resources>

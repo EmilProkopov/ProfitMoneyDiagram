@@ -12,59 +12,60 @@
         android:key="currency_pares"
         android:title="Currency pairs"
         android:summary="Set the currency pair you want to trade"
-        android:defaultValue="BTC/USDT"
+        android:defaultValue="BTC/USD"
         android:entries="@array/currency_pairs"
         android:entryValues="@array/currency_pairs"
         android:dialogTitle="Choose the currency pair" />
 
     <SwitchPreference
-        android:key="use_logger"
+        android:key="extract_data_directly"
+        android:defaultValue="false"
         android:summaryOff="Extract data using logger"
         android:summaryOn="Get data directly from markets"
         android:switchTextOff="logger"
         android:switchTextOn="markets" />
 
     <CheckBoxPreference
-        android:defaultValue="true"
+        android:defaultValue="false"
         android:key="bitfinex"
         android:summary="Bitfinex"
         android:title="Include data from Bitfinex"
-        android:dependency="use_logger"/>
+        android:dependency="extract_data_directly"/>
     <CheckBoxPreference
-        android:defaultValue="true"
+        android:defaultValue="false"
         android:key="bitstamp"
         android:summary="Bitstamp"
         android:title="Include data from Bitstamp"
-        android:dependency="use_logger"/>
+        android:dependency="extract_data_directly"/>
     <CheckBoxPreference
-        android:defaultValue="true"
+        android:defaultValue="false"
         android:key="cex"
         android:summary="Cex"
         android:title="Include data from Cex"
-        android:dependency="use_logger"/>
+        android:dependency="extract_data_directly"/>
     <CheckBoxPreference
-        android:defaultValue="true"
+        android:defaultValue="false"
         android:key="cryptopia"
         android:summary="Cryptopia"
         android:title="Include data from Cryptopia"
-        android:dependency="use_logger"/>
+        android:dependency="extract_data_directly"/>
     <CheckBoxPreference
-        android:defaultValue="true"
+        android:defaultValue="false"
         android:key="exmo"
         android:summary="Exmo"
         android:title="Include data from Exmo"
-        android:dependency="use_logger"/>
+        android:dependency="extract_data_directly"/>
     <CheckBoxPreference
-        android:defaultValue="true"
+        android:defaultValue="false"
         android:key="gdax"
         android:summary="Gdax"
         android:title="Include data from Gdax"
-        android:dependency="use_logger"/>
+        android:dependency="extract_data_directly"/>
     <CheckBoxPreference
-        android:defaultValue="true"
+        android:defaultValue="false"
         android:key="kucoin"
         android:summary="Kucoin"
         android:title="Include data from Kucoin"
-        android:dependency="use_logger"/>
+        android:dependency="extract_data_directly"/>
 
 </PreferenceScreen>

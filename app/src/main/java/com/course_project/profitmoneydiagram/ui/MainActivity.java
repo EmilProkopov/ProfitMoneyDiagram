@@ -12,9 +12,19 @@ import com.course_project.profitmoneydiagram.asynctasks.LoggerAsyncTask;
 
 public class MainActivity extends AppCompatActivity {
 
+    //onClick for settings button.
     public void onClick1 (View v) {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
+    }
+
+    //Show a text message on the screan.
+    private void showToast(String msg) {
+        Toast toast = Toast.makeText(getApplicationContext(),
+                msg,
+                Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
     }
 
     @Override

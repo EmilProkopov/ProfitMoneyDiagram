@@ -23,7 +23,7 @@
                 android:id = "@+id/currency_pair"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:text="BTC/USDT"
+                tools:text="BTC/USD"
                 android:textSize="18sp"
                 android:gravity="center"
                 android:textColor="@color/colorPrimary"/>

@@ -36,7 +36,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-
+//Creates new thread, gets data from logger (https://logger-mongo.azurewebsites.net) and displays it.
 public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
 
     private static final String LOGTAG = "LoggerAsyncTask";
@@ -56,7 +56,7 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
         Log.d(LOGTAG, "Logger ASYNCTASK STARTED");
     }
 
-
+    //Show a text message on the screan.
     private void showToast(String msg) {
         Toast toast = Toast.makeText(activityReference.get().getApplicationContext(),
                 msg,
@@ -65,21 +65,23 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
         toast.show();
     }
 
-
-    private void updateUpdateRateSeconds () {
+    //Gets updateRateSeconds value from settings.
+    private void updateUpdateRateSeconds() {
 
         try {
-            updateRateSeconds = Integer.parseInt(sp.getString("update_rate","10"));
+            updateRateSeconds = Integer.parseInt(sp.getString("update_rate", "10"));
         } catch (java.lang.RuntimeException e) {
             Log.e(LOGTAG, "Wrong formated string: update rate");
             updateRateSeconds = 10;
         }
     }
 
-    private void updateCurrencyPair () {
+    //Gets currencyPair value from settings.
+    private void updateCurrencyPair() {
 
-            currencyPair = sp.getString("currency_pares","NotChosen/");
-            secondCurrency = currencyPair.split("/")[1];
+        currencyPair = "BTC/USD"; //Avoiding the NullPointerException during the first launch.
+        currencyPair = sp.getString("currency_pares", "BTC/USD");
+        secondCurrency = currencyPair.split("/")[1];
     }
 
 
@@ -95,30 +97,43 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
         MarketApi api = retrofit.create(MarketApi.class);
         //Создаем объект, при помощи которого будем выполнять запросы
 
-        Call<List<LabResponse>> responseCall;
-
+        Call<List<LabResponse>> responseCall = null;
         Response<List<LabResponse>> res;
-
         LabResponse labResponse = null;
 
         while (!isCancelled()) {
 
+            //Check if settings were changed.
             updateUpdateRateSeconds();
             updateCurrencyPair();
 
+            //Try to get data from Internet.
             try {
-                responseCall = api.getLabResponce("btc_usd");
+                if (currencyPair.equals("BTC/USD")) {
+                    responseCall = api.getLabResponce("btc_usd");
+                } else if (currencyPair.equals("ETH/USD")) {
+                    responseCall = api.getLabResponce("eth_usd");
+                }
                 res = responseCall.execute();
                 labResponse = res.body().get(0);
             } catch (IOException e) {
                 Log.e(LOGTAG, e.toString());
             }
 
+            //Display data.
             publishProgress(labResponse);
 
+            //Stop executing if user has changed settings and data should be updated
+            // without using logger.
+            if (sp.getBoolean("extract_data_directly", false)) {
+                Log.d(LOGTAG, "CANCELLED");
+                cancel(true);
+            }
+
+            //Wait before next data updating.
             try {
                 TimeUnit.SECONDS.sleep(updateRateSeconds);
-            } catch(InterruptedException e) {
+            } catch (InterruptedException e) {
                 Log.d(LOGTAG, e.getMessage());
             }
         }
@@ -128,49 +143,74 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
 
 
     @Override
-    protected void onProgressUpdate(LabResponse ... params) {
+    protected void onProgressUpdate(LabResponse... params) {
 
         super.onProgressUpdate(params);
         LabResponse response = params[0];
 
-        if(response == null) {
+        if (response == null) {
             showToast("Bad Internet connection");
             return;
         }
 
+        //Display profit points on the diagram.
         LineChart chart = (LineChart) activityReference.get().findViewById(R.id.diagram);
-        List <Entry> chartEntries = new ArrayList<>();
+        List<Entry> chartEntries = new ArrayList<>();
+        ArrayList<Integer> circleColors = new ArrayList<Integer>();
 
-        for(int i = 0; i < response.getAmountPoints().size(); ++i) {
-            chartEntries.add(new Entry(response.getAmountPoints().get(i).floatValue()
-                    ,response.getProfitPoints().get(i).floatValue()));
+        Float optimalAmount = response.getOptimalPoint().getAmount().floatValue();
+        Float optimalProfit = response.getOptimalPoint().getProfit().floatValue();
+
+        Entry curEntry;
+        for (int i = 0; i < response.getAmountPoints().size(); ++i) {
+
+            curEntry = new Entry(response.getAmountPoints().get(i).floatValue()
+                    , response.getProfitPoints().get(i).floatValue());
+
+            //If this is an optimal point.
+
+            if((optimalAmount.equals(curEntry.getX())
+                    && optimalProfit.equals(curEntry.getY()))) {
+
+                circleColors.add(activityReference.get()
+                        .getResources().getColor(R.color.diagramCircleOptimal));
+            } else {
+                circleColors.add(activityReference.get()
+                        .getResources().getColor(R.color.diagramCircleOrdinary));
+            }
+
+            chartEntries.add(curEntry);
         }
 
         LineDataSet ds = new LineDataSet(chartEntries, "Profit/Money Diagram");
         ds.setColor(R.color.colorPrimaryDark);
+        ds.setCircleColors(circleColors);
 
         LineData ld = new LineData(ds);
 
         chart.setData(ld);
         chart.invalidate();
 
+        //Display optimal profit.
+        ((TextView) activityReference.get().findViewById(R.id.profit_string))
+                .setText(Double.toString((float) Math.round(response.getProfit() * 100) / 100.0)
+                        + " " + secondCurrency);
+        //Display optimal amount.
+        ((TextView) activityReference.get().findViewById(R.id.amount_string))
+                .setText(Double.toString((float) Math.round(response.getAmount() * 100) / 100.0)
+                        + " " + secondCurrency);
+        //Display current currency pair.
+        ((TextView) activityReference.get().findViewById(R.id.currency_pair)).setText(currencyPair);
 
-        ((TextView)activityReference.get().findViewById(R.id.profit_string))
-                .setText(Double.toString((float)Math.round(response.getProfit()*100)/100.0)
-                        +" "+secondCurrency);
-        ((TextView)activityReference.get().findViewById(R.id.amount_string))
-                .setText(Double.toString((float)Math.round(response.getAmount()*100)/100.0)
-                        +" "+secondCurrency);
-        ((TextView)activityReference.get().findViewById(R.id.currency_pair)).setText(currencyPair);
-
-
+        //Prepare data about deals for displaying.
         DealListData dldata = new DealListData(response.getOrders());
-
+        //Display it.
         RecyclerView list = activityReference.get().findViewById(R.id.iknowdaway);
         LinearLayoutManager llm = new LinearLayoutManager(activityReference.get());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         list.setLayoutManager(llm);
         list.setAdapter(new DealListAdapter(dldata));
+
     }
 
 }
