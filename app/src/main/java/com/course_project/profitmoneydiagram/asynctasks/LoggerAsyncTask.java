@@ -4,7 +4,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -156,49 +158,45 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
         //Display profit points on the diagram.
         LineChart chart = (LineChart) activityReference.get().findViewById(R.id.diagram);
         List<Entry> chartEntries = new ArrayList<>();
-        ArrayList<Integer> circleColors = new ArrayList<Integer>();
 
+        for (int i = 0; i < response.getAmountPoints().size(); ++i) {
+
+            chartEntries.add(new Entry(response.getAmountPoints().get(i).floatValue()
+                    , response.getProfitPoints().get(i).floatValue()));
+        }
+        //Make a DataSet with ordinary points.
+        LineDataSet ds = new LineDataSet(chartEntries, "Profit/Money Diagram");
+        ds.setColor(R.color.colorPrimaryDark);
+        ds.setCircleColors(activityReference.get()
+                .getResources().getColor(R.color.diagramCircleOrdinary));
+
+        //Make a DataSet with optimal point.
         Float optimalAmount = response.getOptimalPoint().getAmount().floatValue();
         Float optimalProfit = response.getOptimalPoint().getProfit().floatValue();
 
-        Entry curEntry;
-        for (int i = 0; i < response.getAmountPoints().size(); ++i) {
+        List<Entry> optimalChartEntries = new ArrayList<>();
+        optimalChartEntries.add(new Entry(optimalAmount,optimalProfit));
+        LineDataSet ds2 = new LineDataSet(optimalChartEntries, "");
+        ds2.setColor(R.color.colorPrimaryDark);
+        ds2.setCircleColors(activityReference.get()
+                .getResources().getColor(R.color.diagramCircleOptimal));
 
-            curEntry = new Entry(response.getAmountPoints().get(i).floatValue()
-                    , response.getProfitPoints().get(i).floatValue());
-
-            //If this is an optimal point.
-
-            if((optimalAmount.equals(curEntry.getX())
-                    && optimalProfit.equals(curEntry.getY()))) {
-
-                circleColors.add(activityReference.get()
-                        .getResources().getColor(R.color.diagramCircleOptimal));
-            } else {
-                circleColors.add(activityReference.get()
-                        .getResources().getColor(R.color.diagramCircleOrdinary));
-            }
-
-            chartEntries.add(curEntry);
-        }
-
-        LineDataSet ds = new LineDataSet(chartEntries, "Profit/Money Diagram");
-        ds.setColor(R.color.colorPrimaryDark);
-        ds.setCircleColors(circleColors);
-
-        LineData ld = new LineData(ds);
+        LineDataSet[] lineDataSets = new LineDataSet[2];
+        lineDataSets[0] = ds;
+        lineDataSets[1] = ds2;
+        LineData ld = new LineData(lineDataSets);
 
         chart.setData(ld);
+        chart.setNoDataText("Failed to get data \n" +
+                "Please check Internet connection");
         chart.invalidate();
 
         //Display optimal profit.
         ((TextView) activityReference.get().findViewById(R.id.profit_string))
-                .setText(Double.toString((float) Math.round(response.getProfit() * 100) / 100.0)
-                        + " " + secondCurrency);
+                .setText((Math.round(optimalProfit * 100) / 100.0) + " " + secondCurrency);
         //Display optimal amount.
         ((TextView) activityReference.get().findViewById(R.id.amount_string))
-                .setText(Double.toString((float) Math.round(response.getAmount() * 100) / 100.0)
-                        + " " + secondCurrency);
+                .setText((Math.round(optimalAmount * 100) / 100.0) + " " + secondCurrency);
         //Display current currency pair.
         ((TextView) activityReference.get().findViewById(R.id.currency_pair)).setText(currencyPair);
 
@@ -207,6 +205,7 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
         //Display it.
         RecyclerView list = activityReference.get().findViewById(R.id.iknowdaway);
         LinearLayoutManager llm = new LinearLayoutManager(activityReference.get());
+
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         list.setLayoutManager(llm);
         list.setAdapter(new DealListAdapter(dldata));

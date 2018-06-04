@@ -13,6 +13,10 @@ public class DealListData {
     private List<String> names;
     private List<String> types;
 
+    private double roundTo9(double d) {
+        return Math.round(d*1000_000_000)/1000_000_000;
+    }
+
     public DealListData(Orders orders) {
 
         prices = new ArrayList<>();
@@ -21,20 +25,20 @@ public class DealListData {
         types = new ArrayList<>();
 
         if(orders.getAsks().getGdax() != null) {
-            prices.add(orders.getAsks().getGdax().get(0));
-            amounts.add(orders.getAsks().getGdax().get(1));
+            prices.add(roundTo9(orders.getAsks().getGdax().get(0)));
+            amounts.add(roundTo9(orders.getAsks().getGdax().get(1)));
             names.add("Gdax");
             types.add("Buy");
         }
         if(orders.getAsks().getKraken() != null) {
-            prices.add(orders.getAsks().getKraken().get(0));
-            amounts.add(orders.getAsks().getKraken().get(1));
+            prices.add(roundTo9(orders.getAsks().getKraken().get(0)));
+            amounts.add(roundTo9(orders.getAsks().getKraken().get(1)));
             names.add("Kraken");
             types.add("Buy");
         }
         if(orders.getBids().getExmo() != null) {
-            prices.add(orders.getBids().getExmo().get(0));
-            amounts.add(orders.getBids().getExmo().get(1));
+            prices.add(roundTo9(orders.getBids().getExmo().get(0)));
+            amounts.add(roundTo9(orders.getBids().getExmo().get(1)));
             names.add("Exmo");
             types.add("Buy");
         }

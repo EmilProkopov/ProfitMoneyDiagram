@@ -46,7 +46,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimaryDark"
-        android:paddingTop="20dp"
+        android:paddingTop="5dp"
         android:textAlignment="center"
         android:textColor="@color/colorPrimary"
         android:textSize="35sp"
@@ -68,13 +68,14 @@
         android:id="@+id/diagram"
         android:layout_width="match_parent"
         android:layout_height="250dp"
-        android:padding="10dp"/>
+        android:padding="10dp"
+        android:background="@color/colorPrimary"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/iknowdaway"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
+        android:background="@color/colorPrimaryDark"
         app:layoutManager="LinearLayoutManager" />
 
 
