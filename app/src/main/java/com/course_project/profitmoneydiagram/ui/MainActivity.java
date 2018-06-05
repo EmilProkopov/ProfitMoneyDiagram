@@ -1,6 +1,7 @@
 package com.course_project.profitmoneydiagram.ui;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -9,6 +10,7 @@ import android.widget.Toast;
 
 import com.course_project.profitmoneydiagram.R;
 import com.course_project.profitmoneydiagram.asynctasks.LoggerAsyncTask;
+import com.course_project.profitmoneydiagram.asynctasks.SoloAsyncTask;
 
 public class MainActivity extends AppCompatActivity {
 

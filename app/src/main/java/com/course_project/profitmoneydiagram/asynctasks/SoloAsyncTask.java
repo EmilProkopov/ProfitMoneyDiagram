@@ -1,15 +1,20 @@
 package com.course_project.profitmoneydiagram.asynctasks;
 
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Gravity;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.course_project.profitmoneydiagram.R;
 import com.course_project.profitmoneydiagram.api.MarketApi;
 import com.course_project.profitmoneydiagram.model.CompiledOrderBook;
+import com.course_project.profitmoneydiagram.model.Deal;
 import com.course_project.profitmoneydiagram.model.DealListData;
 import com.course_project.profitmoneydiagram.model.OrderBookGetter;
 import com.course_project.profitmoneydiagram.model.OutputDataSet;
@@ -35,123 +40,166 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet> {
 
-    private static final String LOGTAG = "SoloAsyncTask";
+    //private static final String LOGTAG = "SoloAsyncTask";
+    private static final String LOGTAG = "BBBBBBBBBBBBBBBBBBBBBB";
     private static int updateRateSeconds = 10;
 
     private WeakReference<AppCompatActivity> activityReference;
+    private SharedPreferences sp;
+    private String currencyPair;
+    private String secondCurrency;
 
 
     public SoloAsyncTask(AppCompatActivity activity) {
 
         this.activityReference = new WeakReference<>(activity);
+
+        sp = PreferenceManager.getDefaultSharedPreferences(activityReference.get());
+
         Log.d(LOGTAG, "SOLO ASYNCTASK STARTED");
     }
+
+
+    //Show a text message on the screan.
+    private void showToast(String msg) {
+        Toast toast = Toast.makeText(activityReference.get().getApplicationContext(),
+                msg,
+                Toast.LENGTH_SHORT);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
+    }
+
+    //Gets updateRateSeconds value from settings.
+    private void updateUpdateRateSeconds() {
+
+        try {
+            updateRateSeconds = Integer.parseInt(sp.getString("update_rate", "10"));
+        } catch (java.lang.RuntimeException e) {
+            Log.e(LOGTAG, "Wrong formated string: update rate");
+            updateRateSeconds = 10;
+        }
+    }
+
+    //Gets currencyPair value from settings.
+    private void updateCurrencyPair() {
+
+        currencyPair = "BTC/USD"; //Avoiding the NullPointerException during the first launch.
+        currencyPair = sp.getString("currency_pares", "BTC/USD");
+        secondCurrency = currencyPair.split("/")[1];
+    }
+
 
     @Override
     protected OutputDataSet doInBackground(Void... params) {
 
         OrderBookGetter getter = new OrderBookGetter();
-        CompiledOrderBook orderBook = getter.getCompiledOrderBook(1000);
 
-        /*Double profit = 0.0;
-        Double amount = 0.0;
-        Integer tradeCnt = 0;
-        ArrayList <Double> profitPoints = new ArrayList<>();
-        ArrayList <Double> amountPoints = new ArrayList<>();
-        Double alpha = 0.1;
-        Double optimalAmount = 0.0;
-        Double optimalProfit = 0.0;
-        Integer num = 0;
-        Boolean ok = true;
+        while (!isCancelled()) {
 
-        int bx=0, ax = 0;
-
-        OutputDataSet outputDataSet = new OutputDataSet();
-
-        while((ax < orderBook.getAsks().size())
-                && (bx < orderBook.getBids().size())
-                && (orderBook.getBids().get(bx).getPrice() > orderBook.getAsks().get(ax).getPrice())) {
+            //Check if settings were changed.
+            updateUpdateRateSeconds();
+            updateCurrencyPair();
 
 
+            CompiledOrderBook orderBook = getter.getCompiledOrderBook(1000);
 
-            Double bidVol = orderBook.getBids().get(bx).getAmount();
-            Double askVol = orderBook.getAsks().get(ax).getAmount();
-            if (bidVol.equals(0.0)) {
-                bx += 1;
-                continue;
-            }
-            if (askVol.equals(0.0)) {
-                ax += 1;
-                continue;
-            }
+            Double profit = 0.0;
+            Double amount = 0.0;
+            ArrayList<Double> profitPoints = new ArrayList<>();
+            ArrayList<Double> amountPoints = new ArrayList<>();
+            ArrayList<Deal> deals = new ArrayList<>();
+            final Double alpha = 0.1;
+            Double optimalAmount = 0.0;
+            Double optimalProfit = 0.0;
+            Integer num = 0;
 
-            Double m = min(bidVol, askVol);
-            Double currentProfit = (orderBook.getBids().get(bx).getPrice()
-                    - orderBook.getAsks().get(ax).getPrice()) * m;
+            //iterators.
+            int bx = 0, ax = 0;
 
-            profit += currentProfit;
-            amount += orderBook.getAsks().get(ax).getPrice() * m;
+            OutputDataSet outputDataSet = new OutputDataSet();
 
-            profitPoints.add(profit);
-            amountPoints.add(amount);
-            Double oldBidAmount = orderBook.getBids().get(bx).getAmount();
-            Double oldAskAmount = orderBook.getAsks().get(ax).getAmount();
-            orderBook.getBids().get(bx).setAmount(oldBidAmount - m);
-            orderBook.getAsks().get(ax).setAmount(oldAskAmount - m);
-            tradeCnt += 1;
+            while ((ax < orderBook.getAsks().size())
+                    && (bx < orderBook.getBids().size())
+                    && (orderBook.getBids().get(bx).getPrice() > orderBook.getAsks().get(ax).getPrice())) {
 
-            num += 1;
 
-            Double prevAmount = null;
-            Double prevProfit = null;
-            Double firstK = null;
+                Double bidAmount = orderBook.getBids().get(bx).getAmount();
+                Double askAmount = orderBook.getAsks().get(ax).getAmount();
+                if (bidAmount.equals(0.0)) {
+                    bx += 1;
+                    continue;
+                }
+                if (askAmount.equals(0.0)) {
+                    ax += 1;
+                    continue;
+                }
 
-            if (num.equals(1)) {
-                prevAmount = amount;
-                prevProfit = profit;
-            }
-            else if (num.equals(2)) {
-                firstK = (profit - prevProfit) / (amount - prevAmount);
-                prevAmount = amount;
-                prevProfit = profit;
-            }
-            else {
-                Double k = (profit - prevProfit) / (amount - prevAmount);
-                if (k / firstK >= alpha) {
-                    optimalAmount = amount;
-                    optimalProfit = profit;
+                Double m = Math.min(bidAmount, askAmount);
+
+                Double currentProfit = (orderBook.getBids().get(bx).getPrice()
+                        - orderBook.getAsks().get(ax).getPrice()) * m;
+
+                profit += currentProfit;
+                amount += orderBook.getAsks().get(ax).getPrice() * m;
+
+                profitPoints.add(profit);
+                amountPoints.add(amount);
+
+                deals.add(new Deal("Buy", orderBook.getAsks().get(ax).getMarket()
+                        , m, orderBook.getAsks().get(ax).getPrice()));
+                deals.add(new Deal("Sell", orderBook.getBids().get(bx).getMarket()
+                        , m, orderBook.getBids().get(bx).getPrice()));
+
+                Double oldBidAmount = orderBook.getBids().get(bx).getAmount();
+                Double oldAskAmount = orderBook.getAsks().get(ax).getAmount();
+                orderBook.getBids().get(bx).setAmount(oldBidAmount - m);
+                orderBook.getAsks().get(ax).setAmount(oldAskAmount - m);
+
+                num += 1;
+
+                Double prevAmount = 0.0;
+                Double prevProfit = 0.0;
+                Double firstK = 0.0;
+
+                if (num.equals(1)) {
+                    prevAmount = amount;
+                    prevProfit = profit;
+                } else if (num.equals(2)) {
+                    firstK = (profit - prevProfit) / (amount - prevAmount);
+                    prevAmount = amount;
+                    prevProfit = profit;
                 } else {
-                    ok = false;
+                    Double k = (profit - prevProfit) / (amount - prevAmount);
+                    if (k / firstK >= alpha) {
+                        optimalAmount = amount;
+                        optimalProfit = profit;
+                    }
+                    prevAmount = amount;
+                    prevProfit = profit;
                 }
-                if (ok) {
-                    bid_exch = bids[bx][2]
-                    if bid_exch in bid_orders:
-                    bid_orders[bid_exch][0] = min(bid_orders[bid_exch][0], bids[bx][0])
-                    bid_orders[bid_exch][1] += m
-                    else:
-                    bid_orders[bid_exch] = [bids[bx][0], m]
-                    ask_exch = asks[ax][2]
-                    if ask_exch in ask_orders:
-                    ask_orders[ask_exch][0] = max(ask_orders[ask_exch][0], asks[ax][0])
-                    ask_orders[ask_exch][1] += m
-                    else:
-                    ask_orders[ask_exch] = [asks[ax][0], m]
-                    int OMG = 42;
-                }
-                prevAmount = amount;
-                prevProfit = profit;
             }
-            ax++;
-            bx++;
+
+            outputDataSet.setProfit(profit);
+            outputDataSet.setAmount(amount);
+            outputDataSet.setOptimalAmount(optimalAmount);
+            outputDataSet.setOptimalProfit(optimalProfit);
+            outputDataSet.setAmountPoints(amountPoints);
+            outputDataSet.setProfitPoints(profitPoints);
+            outputDataSet.setDeals(deals);
+
+
+            //Display data.
+            publishProgress(outputDataSet);
+
+            //Wait before next data updating.
+            try {
+                TimeUnit.SECONDS.sleep(updateRateSeconds);
+            } catch (InterruptedException e) {
+                Log.d(LOGTAG, e.getMessage());
+            }
         }
 
-
-        outputDataSet.setProfit(profit);
-        outputDataSet.setOptimalAmount(amount);
-        outputDataSet.setOptimalProfit(profit);
-        outputDataSet.setAmountPoints(amountPoints);
-        outputDataSe.setProfitPoints(profitPoints);*/
-        return new OutputDataSet();
+        return null;
     }
 
 
@@ -159,36 +207,68 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
     protected void onProgressUpdate(OutputDataSet ... params) {
 
         super.onProgressUpdate(params);
-        OutputDataSet data = params[0];
+        OutputDataSet dataSet = params[0];
 
-        LineChart chart = (LineChart) activityReference.get().findViewById(R.id.diagram);
-        List <Entry> chartEntries = new ArrayList<>();
-
-        for(int i = 0; i < data.getAmountPoints().size(); ++i) {
-            chartEntries.add(new Entry(data.getAmountPoints().get(i).floatValue()
-                    ,data.getProfitPoints().get(i).floatValue()));
+        if (dataSet.getAmountPoints().size() == 0) {
+            showToast("Bad Internet connection");
+            return;
         }
 
+        //Display profit points on the diagram.
+        LineChart chart = (LineChart) activityReference.get().findViewById(R.id.diagram);
+        List<Entry> chartEntries = new ArrayList<>();
+
+        for (int i = 0; i < dataSet.getAmountPoints().size(); ++i) {
+
+            chartEntries.add(new Entry(dataSet.getAmountPoints().get(i).floatValue()
+                    , dataSet.getProfitPoints().get(i).floatValue()));
+        }
+        //Make a DataSet with ordinary points.
         LineDataSet ds = new LineDataSet(chartEntries, "Profit/Money Diagram");
         ds.setColor(R.color.colorPrimaryDark);
+        ds.setCircleColors(activityReference.get()
+                .getResources().getColor(R.color.diagramCircleOrdinary));
 
-        LineData ld = new LineData(ds);
+        //Make a DataSet with optimal point.
+        Float optimalAmount = dataSet.getOptimalAmount().floatValue();
+        Float optimalProfit = dataSet.getOptimalProfit().floatValue();
+
+        List<Entry> optimalChartEntries = new ArrayList<>();
+        optimalChartEntries.add(new Entry(optimalAmount,optimalProfit));
+        LineDataSet ds2 = new LineDataSet(optimalChartEntries, "");
+        ds2.setColor(R.color.colorPrimaryDark);
+        ds2.setCircleColors(activityReference.get()
+                .getResources().getColor(R.color.diagramCircleOptimal));
+
+        LineDataSet[] lineDataSets = new LineDataSet[2];
+        lineDataSets[0] = ds;
+        lineDataSets[1] = ds2;
+        LineData ld = new LineData(lineDataSets);
 
         chart.setData(ld);
+        chart.setNoDataText("Failed to get data \n" +
+                "Please check Internet connection");
         chart.invalidate();
 
 
-        ((TextView)activityReference.get().findViewById(R.id.profit_string))
-                .setText(Double.toString((float)Math.round(data.getProfit()*100)/100.0)+" USDT");
+        //Display optimal profit.
+        ((TextView) activityReference.get().findViewById(R.id.profit_string))
+                .setText((Math.round(optimalProfit * 100) / 100.0) + " " + secondCurrency);
+        //Display optimal amount.
+        ((TextView) activityReference.get().findViewById(R.id.amount_string))
+                .setText((Math.round(optimalAmount * 100) / 100.0) + " " + secondCurrency);
+        //Display current currency pair.
+        ((TextView) activityReference.get().findViewById(R.id.currency_pair)).setText(currencyPair);
 
+        //Prepare data about deals for displaying.
+        DealListData dldata = new DealListData(dataSet);
+        //Display it.
+        RecyclerView list = activityReference.get().findViewById(R.id.iknowdaway);
+        LinearLayoutManager llm = new LinearLayoutManager(activityReference.get());
 
-        //DealListData dldata = new DealListData(data.getDeals());
-
-        //RecyclerView list = activityReference.get().findViewById(R.id.iknowdaway);
-        //LinearLayoutManager llm = new LinearLayoutManager(activityReference.get());
-        //llm.setOrientation(LinearLayoutManager.VERTICAL);
-        //list.setLayoutManager(llm);
-        //list.setAdapter(new DealListAdapter(dldata));
+        llm.setOrientation(LinearLayoutManager.VERTICAL);
+        list.setLayoutManager(llm);
+        list.setAdapter(new DealListAdapter(dldata));
     }
 
 }

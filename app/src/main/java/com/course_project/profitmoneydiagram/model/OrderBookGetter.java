@@ -3,8 +3,6 @@ package com.course_project.profitmoneydiagram.model;
 import android.util.Log;
 
 import com.course_project.profitmoneydiagram.api.MarketApi;
-import com.course_project.profitmoneydiagram.model.CompiledOrderBook;
-import com.course_project.profitmoneydiagram.model.PriceAmountPair;
 import com.course_project.profitmoneydiagram.network.bitfinex.BitfinexResponse;
 import com.course_project.profitmoneydiagram.network.bitstamp.BitstampResponce;
 import com.course_project.profitmoneydiagram.network.cex.CexResponse;
@@ -26,7 +24,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class OrderBookGetter {
 
-    private static final String LOGTAG = "OrderBookGetter";
+    //private static final String LOGTAG = "OrderBookGetter";
+    private static final String LOGTAG = "AAAAAAAAAAAAAAAAAAAAAA";
 
     private MarketApi api;
     private Retrofit retrofit;
@@ -45,7 +44,7 @@ public class OrderBookGetter {
     /*JSON not parcing
     private BinanceResponse getBinanceResponse (int limit) {
 
-        Log.d(LOGTAG, "YAP");
+        Log.e(LOGTAG, "YAP");
 
         retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.binance.com") //Базовая часть адреса
@@ -75,10 +74,10 @@ public class OrderBookGetter {
     private List<PriceAmountPair> getBinanceCleanOrderBook(int limit) {
         BinanceResponse responce = getBinanceResponse(limit);
 
-        if (responce == null) Log.d(LOGTAG, "GOT NULL RESPONCE");
-        else Log.d(LOGTAG, "GOT NOT NULL RESPONCE");
+        if (responce == null) Log.e(LOGTAG, "GOT NULL RESPONCE");
+        else Log.e(LOGTAG, "GOT NOT NULL RESPONCE");
 
-        //Log.d(LOGTAG, Integer.toString(responce.getAsks().size()));
+        //Log.e(LOGTAG, Integer.toString(responce.getAsks().size()));
         return new ArrayList<>();
     }*/
 
@@ -87,13 +86,11 @@ public class OrderBookGetter {
     private BitfinexResponse getBitfinexResponse (int limit) {
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.bitfinex.com") //Базовая часть адреса
+                .baseUrl("https://api.bitfinex.com")
                 .addConverterFactory(GsonConverterFactory.create())
-                //Конвертер, необходимый для преобразования JSON'а в объекты
                 .build();
 
         api = retrofit.create(MarketApi.class);
-        //Создаем объект, при помощи которого будем выполнять запросы
 
         String strLimit = String.valueOf(limit);
 
@@ -119,9 +116,9 @@ public class OrderBookGetter {
 
 
         if(responce != null) {
-            Log.d(LOGTAG, "Bitfenix OK");
+            Log.e(LOGTAG, "Bitfenix OK");
         } else {
-            Log.d(LOGTAG, "Bitfenix FAIL");
+            Log.e(LOGTAG, "Bitfenix FAIL");
             return new CompiledOrderBook();
         }
 
@@ -191,9 +188,9 @@ public class OrderBookGetter {
         responce = getBitstampResponse();
 
         if(responce != null) {
-            Log.d(LOGTAG, "Bitstamp OK");
+            Log.e(LOGTAG, "Bitstamp OK");
         } else {
-            Log.d(LOGTAG, "Bitstamp FAIL");
+            Log.e(LOGTAG, "Bitstamp FAIL");
             return new CompiledOrderBook();
         }
 
@@ -260,13 +257,13 @@ public class OrderBookGetter {
         BittrexResponce responce = getBittrexResponse();
 
 
-        Log.d(LOGTAG, Integer.toString(responce.getResult().getBuy().size()));
+        Log.e(LOGTAG, Integer.toString(responce.getResult().getBuy().size()));
         return new ArrayList<>();
     }*/
 
 
 
-    private CexResponse getCexFullResponse () {
+    private CexResponse getCexPartResponse(int limit) {
 
         retrofit = new Retrofit.Builder()
                 .baseUrl("https://cex.io") //Базовая часть адреса
@@ -277,7 +274,8 @@ public class OrderBookGetter {
         api = retrofit.create(MarketApi.class);
         //Создаем объект, при помощи которого будем выполнять запросы
 
-        Call<CexResponse> responseCall = api.getCexAllOrderBookBTCUSDT();
+        String strLimit = String.valueOf(limit);
+        Call<CexResponse> responseCall = api.getCexPartOrderBookBTCUSDT(strLimit);
 
         Response<CexResponse> res;
 
@@ -292,16 +290,16 @@ public class OrderBookGetter {
         return cexResponse;
     }
 
-    private CompiledOrderBook getCexFullCleanOrderBook() {
+    private CompiledOrderBook getCexPartCleanOrderBook(int limit) {
 
-        CexResponse responce = null;
-        responce = getCexFullResponse();
+        CexResponse response = null;
+        response = getCexPartResponse(limit);
 
 
-        if(responce != null) {
-            Log.d(LOGTAG, "Cex OK");
+        if(response != null) {
+            Log.e(LOGTAG, "Cex OK");
         } else {
-            Log.d(LOGTAG, "Cex FAIL");
+            Log.e(LOGTAG, "Cex FAIL");
             return new CompiledOrderBook();
         }
 
@@ -309,24 +307,24 @@ public class OrderBookGetter {
         ArrayList <PriceAmountPair> curAsks = new ArrayList<>();
         ArrayList <PriceAmountPair> curBids = new ArrayList<>();
 
-        for(int i = 0; i < responce.getAsks().size(); ++i) {
+        for(int i = 0; i < response.getAsks().size(); ++i) {
 
             PriceAmountPair curPriceQtyPair = new PriceAmountPair();
 
-            curPriceQtyPair.setPrice(responce.getAsks().get(i).get(0));
-            curPriceQtyPair.setAmount(responce.getAsks().get(i).get(1));
+            curPriceQtyPair.setPrice(response.getAsks().get(i).get(0));
+            curPriceQtyPair.setAmount(response.getAsks().get(i).get(1));
             curPriceQtyPair.setMarket("Cex");
 
             curAsks.add(curPriceQtyPair);
         }
         res.setAsks(curAsks);
 
-        for(int i = 0; i < responce.getBids().size(); ++i) {
+        for(int i = 0; i < response.getBids().size(); ++i) {
 
             PriceAmountPair curPriceQtyPair = new PriceAmountPair();
 
-            curPriceQtyPair.setPrice(responce.getBids().get(i).get(0));
-            curPriceQtyPair.setAmount(responce.getBids().get(i).get(1));
+            curPriceQtyPair.setPrice(response.getBids().get(i).get(0));
+            curPriceQtyPair.setAmount(response.getBids().get(i).get(1));
             curPriceQtyPair.setMarket("Cex");
 
             curBids.add(curPriceQtyPair);
@@ -370,9 +368,9 @@ public class OrderBookGetter {
         responce = getCryptopiaResponseBTCUSTD();
 
         if(responce != null) {
-            Log.d(LOGTAG, "Cryptopia OK");
+            Log.e(LOGTAG, "Cryptopia OK");
         } else {
-            Log.d(LOGTAG, "Cryptopia FAIL");
+            Log.e(LOGTAG, "Cryptopia FAIL");
             return new CompiledOrderBook();
         }
 
@@ -443,9 +441,9 @@ public class OrderBookGetter {
         responce = getExmoResponseBTCUSTD(limit);
 
         if(responce != null) {
-            Log.d(LOGTAG, "Exmo OK");
+            Log.e(LOGTAG, "Exmo OK");
         } else {
-            Log.d(LOGTAG, "Exmo FAIL");
+            Log.e(LOGTAG, "Exmo FAIL");
             return new CompiledOrderBook();
         }
 
@@ -515,9 +513,9 @@ public class OrderBookGetter {
         responce = getGdaxResponseTop50BTCUSTD();
 
         if(responce != null) {
-            Log.d(LOGTAG, "Gdax OK");
+            Log.e(LOGTAG, "Gdax OK");
         } else {
-            Log.d(LOGTAG, "Gdax FAIL");
+            Log.e(LOGTAG, "Gdax FAIL");
             return new CompiledOrderBook();
         }
 
@@ -589,9 +587,9 @@ public class OrderBookGetter {
         responce = getKucoinResponseBTCUSTD(limit);
 
         if(responce != null) {
-            Log.d(LOGTAG, "Kucoin OK");
+            Log.e(LOGTAG, "Kucoin OK");
         } else {
-            Log.d(LOGTAG, "Kucoin FAIL");
+            Log.e(LOGTAG, "Kucoin FAIL");
             return new CompiledOrderBook();
         }
 
@@ -633,18 +631,19 @@ public class OrderBookGetter {
 
         CompiledOrderBook result = new CompiledOrderBook();
 
-        result.addAll(getBitfinexCleanOrderBook(1000));
-        result.addAll(getBitstampCleanOrderBook()); //Strange results
-        result.addAll(getCexFullCleanOrderBook()); //too
-        result.addAll(getCryptopiaCleanOrderBookBTCUSTD()); //Strangely high results
-        result.addAll(getExmoCleanOrderBookBTCUSTD(1000)); //too
+        result.addAll(getBitfinexCleanOrderBook(limit));
+        //result.addAll(getBitstampCleanOrderBook()); //Strange results
+        result.addAll(getCexPartCleanOrderBook(limit));
+       // result.addAll(getCryptopiaCleanOrderBookBTCUSTD()); //Strangely high results
+        result.addAll(getExmoCleanOrderBookBTCUSTD(limit));
         result.addAll(getGdaxTop50CleanOrderBookBTCUSTD());
-        result.addAll(getKucoinCleanOrderBookBTCUSTD(1000));
+        result.addAll(getKucoinCleanOrderBookBTCUSTD(limit));
 
         result.sort();
-        //for(int i = 0; i < result.getAsks().size(); i++) {
-        //    Log.d(LOGTAG, Double.toString(result.getAsks().get(i).getPrice())+"----"+Double.toString(result.getAsks().get(i).getAmount()));
-        //}
+        /*Log.e("AAAAAAAAAAAAAAAAAAAAAAA", result.getAsks().size()+"");
+        for(int i = 0; i < result.getAsks().size(); i++) {
+            Log.e(LOGTAG, Double.toString(result.getAsks().get(i).getPrice())+"----"+Double.toString(result.getAsks().get(i).getAmount()));
+        }*/
 
         return result;
     }

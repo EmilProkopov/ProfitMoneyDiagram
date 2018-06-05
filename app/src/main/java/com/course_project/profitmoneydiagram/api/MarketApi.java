@@ -37,8 +37,6 @@ public interface MarketApi {
     Call<BittrexResponce> getBittrexOrderBook(@Query("market") String market,
                                               @Query("type") String type);
 
-    @GET("/api/order_book/BTC/USD/")
-    Call<CexResponse> getCexAllOrderBookBTCUSDT();
 
     @GET("/api/order_book/BTC/USD/")
     Call<CexResponse> getCexPartOrderBookBTCUSDT(@Query("depth") String depth);

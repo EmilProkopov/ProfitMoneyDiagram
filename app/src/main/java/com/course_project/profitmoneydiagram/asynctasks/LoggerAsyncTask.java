@@ -91,13 +91,12 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
     protected LabResponse doInBackground(Void... params) {
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://logger-mongo.azurewebsites.net") //Базовая часть адреса
+                .baseUrl("https://logger-mongo.azurewebsites.net") //Base url part.
                 .addConverterFactory(GsonConverterFactory.create())
-                //Конвертер, необходимый для преобразования JSON'а в объекты
+                //Converter for converting JSON's to objects.
                 .build();
 
         MarketApi api = retrofit.create(MarketApi.class);
-        //Создаем объект, при помощи которого будем выполнять запросы
 
         Call<List<LabResponse>> responseCall = null;
         Response<List<LabResponse>> res;

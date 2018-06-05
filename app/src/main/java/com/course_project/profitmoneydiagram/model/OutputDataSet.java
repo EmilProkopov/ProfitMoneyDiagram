@@ -10,6 +10,7 @@ public class OutputDataSet {
     private List <Double> profitPoints;
     private List <Deal> deals;
     private Double profit;
+    private Double amount;
     private Double optimalAmount;
     private Double optimalProfit;
 
@@ -20,6 +21,14 @@ public class OutputDataSet {
         profit = 0.0;
         optimalAmount = 0.0;
         optimalProfit = 0.0;
+    }
+
+    public Double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Double amount) {
+        this.amount = amount;
     }
 
     public List<Double> getAmountPoints() {
@@ -69,42 +78,6 @@ public class OutputDataSet {
 
     public void setOptimalProfit(Double optimalProfit) {
         this.optimalProfit = optimalProfit;
-    }
-
-    private class Deal {
-        private String type;
-        private String where;
-        private Integer amount;
-
-        public Deal() {
-            type = null;
-            where = null;
-            amount = null;
-        }
-
-        public Integer getAmount() {
-            return amount;
-        }
-
-        public void setAmount(Integer amount) {
-            this.amount = amount;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public void setType(String type) {
-            this.type = type;
-        }
-
-        public String getWhere() {
-            return where;
-        }
-
-        public void setWhere(String where) {
-            this.where = where;
-        }
     }
 
 }

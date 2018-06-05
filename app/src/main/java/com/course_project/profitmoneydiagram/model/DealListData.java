@@ -18,7 +18,23 @@ public class DealListData {
         return (Math.round(d*1e9)/1e9);
     }
 
-    public DealListData(Orders orders) {
+    public DealListData (OutputDataSet dataSet) {
+
+        prices = new ArrayList<>();
+        names = new ArrayList<>();
+        amounts = new ArrayList<>();
+        types = new ArrayList<>();
+
+        for(int i = 0; i < dataSet.getDeals().size(); ++i) {
+
+            prices.add(dataSet.getDeals().get(i).getPrice());
+            types.add(dataSet.getDeals().get(i).getType());
+            amounts.add(dataSet.getDeals().get(i).getAmount());
+            names.add(dataSet.getDeals().get(i).getMarketName());
+        }
+    }
+
+    public DealListData (Orders orders) {
 
         prices = new ArrayList<>();
         names = new ArrayList<>();
