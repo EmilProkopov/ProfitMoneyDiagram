@@ -111,6 +111,8 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
 
             //Try to get data from Internet.
             try {
+                labResponse = null; //Delete previous response.
+
                 if (currencyPair.equals("BTC/USD")) {
                     responseCall = api.getLabResponce("btc_usd");
                 } else if (currencyPair.equals("ETH/USD")) {

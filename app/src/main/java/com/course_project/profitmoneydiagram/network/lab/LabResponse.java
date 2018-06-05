@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
+//Object that is returned by Logger.
 public class LabResponse {
 
     @SerializedName("amount")

@@ -18,6 +18,7 @@ import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
+//Used to form a Retrofit request.
 public interface MarketApi {
     @GET("/api/v1/depth")
     Call<BinanceResponse> getBinanceOrderBook(@Query("symbol") String symbol,

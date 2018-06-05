@@ -15,9 +15,10 @@ import com.course_project.profitmoneydiagram.network.lab.Orders;
 import java.util.ArrayList;
 import java.util.List;
 
+//Adapter for RecyclerView.
 public class DealListAdapter extends RecyclerView.Adapter <DealListAdapter.DealViewHolder> {
 
-    DealListData data;
+    private DealListData data;
 
     public DealListAdapter(DealListData dldata) {
 
@@ -37,9 +38,9 @@ public class DealListAdapter extends RecyclerView.Adapter <DealListAdapter.DealV
     @Override
     public void onBindViewHolder(@NonNull DealViewHolder holder, int position) {
 
-        String text = ""+data.getTypes().get(position)+" "+data.getAmounts().get(position)
+        String text = data.getTypes().get(position)+" "+data.getAmounts().get(position)
                 +" at "+data.getNames().get(position)
-                +" for price of "+data.getPrices().get(position);
+                +"\nfor price of "+data.getPrices().get(position);
 
         holder.weatherTextView.setText(text);
     }
