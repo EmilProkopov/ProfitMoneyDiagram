@@ -23,6 +23,49 @@ public class OutputDataSet {
         optimalProfit = 0.0;
     }
 
+    public void uniteDealsMadeOnSameMarkets () {
+
+        ArrayList <Deal> newDealList = new ArrayList<>();
+
+        ArrayList <String> marketNames = new ArrayList<>();
+
+        for (int i = 0; i < deals.size(); ++i) {
+            if(! marketNames.contains(deals.get(i).getMarketName())) {
+                marketNames.add(deals.get(i).getMarketName());
+            }
+        }
+
+        for(int i = 0; i < marketNames.size(); ++i) {
+
+            Deal curDeal = new Deal("Buy", marketNames.get(i), 0.0, 0.0);
+
+            for(int j = 0; j < deals.size(); ++j) {
+                if(deals.get(j).getMarketName().equals(marketNames.get(i))
+                        && deals.get(i).getType().equals("Buy")) {
+
+                    curDeal.setAmount(curDeal.getAmount() + deals.get(i).getAmount());
+                    curDeal.setPrice(Math.min(curDeal.getPrice(), deals.get(i).getPrice()));
+                }
+            }
+
+            newDealList.add(curDeal);
+
+            curDeal = new Deal("Sell", marketNames.get(i), 0.0, 0.0);
+
+            for(int j = 0; j < deals.size(); ++j) {
+                if(deals.get(j).getMarketName().equals(marketNames.get(i))
+                        && deals.get(i).getType().equals("Sell")) {
+
+                    curDeal.setAmount(curDeal.getAmount() + deals.get(i).getAmount());
+                    curDeal.setPrice(Math.max(curDeal.getPrice(), deals.get(i).getPrice()));
+                }
+            }
+
+            newDealList.add(curDeal);
+        }
+        deals = newDealList;
+    }
+
     public Double getAmount() {
         return amount;
     }

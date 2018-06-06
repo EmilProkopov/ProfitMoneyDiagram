@@ -41,8 +41,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet> {
 
-    //private static final String LOGTAG = "SoloAsyncTask";
-    private static final String LOGTAG = "BBBBBBBBBBBBBBBBBBBBBB";
+    private static final String LOGTAG = "SoloAsyncTask";
     private static int updateRateSeconds = 10;
 
     private WeakReference<MainActivity> activityReference;
@@ -97,30 +96,23 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
 
         while (!isCancelled()) {
 
-            //Check if cancelled.
-            if (!sp.getBoolean("extract_data_directly", true)) {
-                Log.d(LOGTAG, "SOLO_CANCELLED");
-                cancel(true);
-                activityReference.get().startLoggerAsyncTask();
-            }
-
             //Check if settings were changed.
             updateUpdateRateSeconds();
             updateCurrencyPair();
 
-
+            //Get order books directly from markets.
             CompiledOrderBook orderBook = getter.getCompiledOrderBook(10);
 
             Double profit = 0.0;
             Double amount = 0.0;
             ArrayList<Double> profitPoints = new ArrayList<>();
             ArrayList<Double> amountPoints = new ArrayList<>();
-            ArrayList<Deal> deals = new ArrayList<>();
+            ArrayList<Deal> deals = new ArrayList<>(); //List of deals that should be made.
             final Double alpha = 0.1;
             Double optimalAmount = 0.0;
             Double optimalProfit = 0.0;
-            Integer num = -1;
-            Double curK = -1.0;
+            Integer num = -1;   //Number of deals to make.
+            Double curK = -1.0; //Current K.
 
             Double prevAmount = 0.0;
             Double prevProfit = 0.0;
@@ -133,8 +125,10 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
 
             while ((ax < orderBook.getAsks().size())
                     && (bx < orderBook.getBids().size())
+                    //While we can make profit from the deal.
                     && (orderBook.getBids().get(bx).getPrice() > orderBook.getAsks().get(ax).getPrice())) {
 
+                num += 1;
 
                 Double bidAmount = orderBook.getBids().get(bx).getAmount();
                 Double askAmount = orderBook.getAsks().get(ax).getAmount();
@@ -147,6 +141,7 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
                     continue;
                 }
 
+                //Amount of currency to buy (sell).
                 Double m = Math.min(bidAmount, askAmount);
 
                 Double currentProfit = (orderBook.getBids().get(bx).getPrice()
@@ -163,17 +158,11 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
                 deals.add(new Deal("Sell", orderBook.getBids().get(bx).getMarket()
                         , m, orderBook.getBids().get(bx).getPrice()));
 
+                //Take into account that we have made a deal and top bid and ask are changed.
                 Double oldBidAmount = orderBook.getBids().get(bx).getAmount();
                 Double oldAskAmount = orderBook.getAsks().get(ax).getAmount();
                 orderBook.getBids().get(bx).setAmount(oldBidAmount - m);
                 orderBook.getAsks().get(ax).setAmount(oldAskAmount - m);
-
-
-                Log.e(LOGTAG, num+"");
-                Log.e(LOGTAG, firstK+"");
-                Log.e(LOGTAG, curK+"");
-
-                num += 1;
 
                 if (num.equals(2)) {
                     firstK = (profit - prevProfit) / (amount - prevAmount);
@@ -189,6 +178,7 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
                 prevProfit = profit;
             }
 
+            //Put data into the resulting data set.
             outputDataSet.setProfit(profit);
             outputDataSet.setAmount(amount);
             outputDataSet.setOptimalAmount(optimalAmount);
@@ -197,9 +187,17 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
             outputDataSet.setProfitPoints(profitPoints);
             outputDataSet.setDeals(deals);
 
+            outputDataSet.uniteDealsMadeOnSameMarkets();
 
             //Display data.
             publishProgress(outputDataSet);
+
+            //Stop executing if user has changed settings and data should be updated using logger.
+            if (!sp.getBoolean("extract_data_directly", true)) {
+                Log.d(LOGTAG, "SOLO_CANCELLED");
+                cancel(true);
+                activityReference.get().startLoggerAsyncTask();
+            }
 
             //Wait before next data updating.
             try {
@@ -208,7 +206,6 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
                 Log.d(LOGTAG, e.getMessage());
             }
         }
-
         return null;
     }
 
