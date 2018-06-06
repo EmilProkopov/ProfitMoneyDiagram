@@ -22,6 +22,7 @@ import com.course_project.profitmoneydiagram.model.OutputDataSet;
 import com.course_project.profitmoneydiagram.network.kucoin.KucoinResponse;
 import com.course_project.profitmoneydiagram.network.lab.LabResponse;
 import com.course_project.profitmoneydiagram.ui.DealListAdapter;
+import com.course_project.profitmoneydiagram.ui.MainActivity;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
@@ -44,12 +45,12 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
     private static final String LOGTAG = "LoggerAsyncTask";
     private static int updateRateSeconds = 10;
 
-    private WeakReference<AppCompatActivity> activityReference;
+    private WeakReference<MainActivity> activityReference;
     private SharedPreferences sp;
     private String currencyPair;
     private String secondCurrency;
 
-    public LoggerAsyncTask(AppCompatActivity activity) {
+    public LoggerAsyncTask(MainActivity activity) {
 
         this.activityReference = new WeakReference<>(activity);
 
@@ -131,6 +132,7 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
             if (sp.getBoolean("extract_data_directly", false)) {
                 Log.d(LOGTAG, "CANCELLED");
                 cancel(true);
+                activityReference.get().startSoloAsyncTask();
             }
 
             //Wait before next data updating.

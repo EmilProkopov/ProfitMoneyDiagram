@@ -21,6 +21,7 @@ import com.course_project.profitmoneydiagram.model.OutputDataSet;
 import com.course_project.profitmoneydiagram.network.kucoin.KucoinResponse;
 import com.course_project.profitmoneydiagram.network.lab.LabResponse;
 import com.course_project.profitmoneydiagram.ui.DealListAdapter;
+import com.course_project.profitmoneydiagram.ui.MainActivity;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
@@ -44,13 +45,13 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
     private static final String LOGTAG = "BBBBBBBBBBBBBBBBBBBBBB";
     private static int updateRateSeconds = 10;
 
-    private WeakReference<AppCompatActivity> activityReference;
+    private WeakReference<MainActivity> activityReference;
     private SharedPreferences sp;
     private String currencyPair;
     private String secondCurrency;
 
 
-    public SoloAsyncTask(AppCompatActivity activity) {
+    public SoloAsyncTask(MainActivity activity) {
 
         this.activityReference = new WeakReference<>(activity);
 
@@ -96,12 +97,19 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
 
         while (!isCancelled()) {
 
+            //Check if cancelled.
+            if (!sp.getBoolean("extract_data_directly", true)) {
+                Log.d(LOGTAG, "SOLO_CANCELLED");
+                cancel(true);
+                activityReference.get().startLoggerAsyncTask();
+            }
+
             //Check if settings were changed.
             updateUpdateRateSeconds();
             updateCurrencyPair();
 
 
-            CompiledOrderBook orderBook = getter.getCompiledOrderBook(1000);
+            CompiledOrderBook orderBook = getter.getCompiledOrderBook(10);
 
             Double profit = 0.0;
             Double amount = 0.0;
@@ -111,7 +119,12 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
             final Double alpha = 0.1;
             Double optimalAmount = 0.0;
             Double optimalProfit = 0.0;
-            Integer num = 0;
+            Integer num = -1;
+            Double curK = -1.0;
+
+            Double prevAmount = 0.0;
+            Double prevProfit = 0.0;
+            Double firstK = -1.0;
 
             //iterators.
             int bx = 0, ax = 0;
@@ -155,28 +168,25 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
                 orderBook.getBids().get(bx).setAmount(oldBidAmount - m);
                 orderBook.getAsks().get(ax).setAmount(oldAskAmount - m);
 
+
+                Log.e(LOGTAG, num+"");
+                Log.e(LOGTAG, firstK+"");
+                Log.e(LOGTAG, curK+"");
+
                 num += 1;
 
-                Double prevAmount = 0.0;
-                Double prevProfit = 0.0;
-                Double firstK = 0.0;
-
-                if (num.equals(1)) {
-                    prevAmount = amount;
-                    prevProfit = profit;
-                } else if (num.equals(2)) {
+                if (num.equals(2)) {
                     firstK = (profit - prevProfit) / (amount - prevAmount);
-                    prevAmount = amount;
-                    prevProfit = profit;
-                } else {
-                    Double k = (profit - prevProfit) / (amount - prevAmount);
-                    if (k / firstK >= alpha) {
+                }
+                else if (num > 1) {
+                    curK = (profit - prevProfit) / (amount - prevAmount);
+                    if (curK / firstK >= alpha) {
                         optimalAmount = amount;
                         optimalProfit = profit;
                     }
-                    prevAmount = amount;
-                    prevProfit = profit;
                 }
+                prevAmount = amount;
+                prevProfit = profit;
             }
 
             outputDataSet.setProfit(profit);
