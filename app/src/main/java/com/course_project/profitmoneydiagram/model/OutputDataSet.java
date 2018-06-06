@@ -44,11 +44,13 @@ public class OutputDataSet {
                         && deals.get(i).getType().equals("Buy")) {
 
                     curDeal.setAmount(curDeal.getAmount() + deals.get(i).getAmount());
-                    curDeal.setPrice(Math.min(curDeal.getPrice(), deals.get(i).getPrice()));
+                    curDeal.setPrice(Math.max(curDeal.getPrice(), deals.get(i).getPrice()));
                 }
             }
 
-            newDealList.add(curDeal);
+            if(!curDeal.getPrice().equals(0.0)) {
+                newDealList.add(curDeal);
+            }
 
             curDeal = new Deal("Sell", marketNames.get(i), 0.0, 0.0);
 
@@ -57,11 +59,13 @@ public class OutputDataSet {
                         && deals.get(i).getType().equals("Sell")) {
 
                     curDeal.setAmount(curDeal.getAmount() + deals.get(i).getAmount());
-                    curDeal.setPrice(Math.max(curDeal.getPrice(), deals.get(i).getPrice()));
+                    curDeal.setPrice(Math.min(curDeal.getPrice(), deals.get(i).getPrice()));
                 }
             }
 
-            newDealList.add(curDeal);
+            if(!curDeal.getPrice().equals(0.0)) {
+                newDealList.add(curDeal);
+            }
         }
         deals = newDealList;
     }
