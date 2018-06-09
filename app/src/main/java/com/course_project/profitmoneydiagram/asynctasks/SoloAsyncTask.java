@@ -101,7 +101,8 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
             updateCurrencyPair();
 
             //Get order books directly from markets.
-            CompiledOrderBook orderBook = getter.getCompiledOrderBook(10);
+            int limit = Integer.parseInt(sp.getString("depth_limit", "50"));
+            CompiledOrderBook orderBook = getter.getCompiledOrderBook(limit);
 
             Double profit = 0.0;
             Double amount = 0.0;
@@ -215,6 +216,7 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
 
         super.onProgressUpdate(params);
         OutputDataSet dataSet = params[0];
+        Log.e(LOGTAG, "SoloAsyncTask RUNNING");
 
         if (dataSet.getAmountPoints().size() == 0) {
             showToast("Bad Internet connection");

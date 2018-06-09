@@ -25,7 +25,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class OrderBookGetter {
 
     //private static final String LOGTAG = "OrderBookGetter";
-    private static final String LOGTAG = "AAAAAAAAAAAAAAAAAAAAAA";
+    private static final String LOGTAG = "OrderBookGetter";
 
     private MarketApi api;
     private Retrofit retrofit;
@@ -41,7 +41,7 @@ public class OrderBookGetter {
     }
 
 
-    /*JSON not parcing
+    /*JSON not parsing
     private BinanceResponse getBinanceResponse (int limit) {
 
         Log.e(LOGTAG, "YAP");

@@ -12,8 +12,11 @@ import com.course_project.profitmoneydiagram.R;
 import com.course_project.profitmoneydiagram.model.DealListData;
 import com.course_project.profitmoneydiagram.network.lab.Orders;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 //Adapter for RecyclerView.
 public class DealListAdapter extends RecyclerView.Adapter <DealListAdapter.DealViewHolder> {
@@ -38,9 +41,12 @@ public class DealListAdapter extends RecyclerView.Adapter <DealListAdapter.DealV
     @Override
     public void onBindViewHolder(@NonNull DealViewHolder holder, int position) {
 
-        String text = data.getTypes().get(position)+" "+data.getAmounts().get(position)
+        DecimalFormat df = new DecimalFormat("0", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+        df.setMaximumFractionDigits(9);
+
+        String text = data.getTypes().get(position)+" "+df.format(data.getAmounts().get(position))
                 +" at "+data.getNames().get(position)
-                +"\nfor price of "+data.getPrices().get(position);
+                +"\nfor price of "+df.format(data.getPrices().get(position));
 
         holder.weatherTextView.setText(text);
     }

@@ -14,6 +14,8 @@ public class OutputDataSet {
     private Double optimalAmount;
     private Double optimalProfit;
 
+    private static final double impossiblyHugePrice = 1e9;
+
     public OutputDataSet () {
         amountPoints = new ArrayList<>();
         profitPoints = new ArrayList<>();
@@ -35,7 +37,7 @@ public class OutputDataSet {
             }
         }
 
-        for(int i = 0; i < marketNames.size(); ++i) {
+        for (int i = 0; i < marketNames.size(); ++i) {
 
             Deal curDeal = new Deal("Buy", marketNames.get(i), 0.0, 0.0);
 
@@ -49,10 +51,17 @@ public class OutputDataSet {
             }
 
             if(!curDeal.getPrice().equals(0.0)) {
-                newDealList.add(curDeal);
+                curDeal.setPrice(curDeal.getPrice());
+                curDeal.setAmount(curDeal.getAmount());
+                if (!curDeal.getAmount().equals(0.0)) {
+                    newDealList.add(curDeal);
+                }
             }
+        }
 
-            curDeal = new Deal("Sell", marketNames.get(i), 0.0, 0.0);
+        for (int i = 0; i < marketNames.size(); ++i) {
+
+            Deal curDeal = new Deal("Sell", marketNames.get(i), 0.0, impossiblyHugePrice);
 
             for(int j = 0; j < deals.size(); ++j) {
                 if(deals.get(j).getMarketName().equals(marketNames.get(i))
@@ -64,9 +73,61 @@ public class OutputDataSet {
             }
 
             if(!curDeal.getPrice().equals(0.0)) {
-                newDealList.add(curDeal);
+                curDeal.setPrice(curDeal.getPrice());
+                curDeal.setAmount(curDeal.getAmount());
+                if (!curDeal.getAmount().equals(0.0)) {
+                    newDealList.add(curDeal);
+                }
             }
         }
+
+        //Making equal.
+
+        double buyAmount = 0;
+        double sellAmount = 0;
+        for (int i = 0; i < newDealList.size(); ++i) {
+            if(newDealList.get(i).getType().equals("Buy")) {
+                buyAmount += newDealList.get(i).getAmount();
+            } else {
+                sellAmount += newDealList.get(i).getAmount();
+            }
+        }
+
+        if (buyAmount > sellAmount) {
+            Double disbalance = buyAmount - sellAmount;
+            for(int i = 0; i < newDealList.size(); ++i) {
+                if (newDealList.get(i).getType().equals("Buy")) {
+                    Double curDealBuyAmount = newDealList.get(i).getAmount();
+                    if (curDealBuyAmount >= disbalance) {
+                        newDealList.get(i).setAmount(curDealBuyAmount - disbalance);
+                        break;
+                    } else {
+                        newDealList.get(i).setAmount(0.0);
+                        disbalance -= curDealBuyAmount;
+                        newDealList.remove(i);
+                        i--;
+                    }
+                }
+            }
+        }
+        else if (buyAmount < sellAmount) {
+            Double disbalance = sellAmount - buyAmount;
+            for(int i = 0; i < newDealList.size(); ++i) {
+                if (newDealList.get(i).getType().equals("Sell")) {
+                    Double curDealSellAmount = newDealList.get(i).getAmount();
+                    if (curDealSellAmount >= disbalance) {
+                        newDealList.get(i).setAmount(curDealSellAmount - disbalance);
+                        break;
+                    } else {
+                        newDealList.get(i).setAmount(0.0);
+                        disbalance -= curDealSellAmount;
+                        newDealList.remove(i);
+                        i--;
+                    }
+                }
+            }
+        }
+
         deals = newDealList;
     }
 

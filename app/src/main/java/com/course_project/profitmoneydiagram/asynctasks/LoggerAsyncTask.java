@@ -152,6 +152,7 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
 
         super.onProgressUpdate(params);
         LabResponse response = params[0];
+        Log.e(LOGTAG, "LoggerAsyncTask RUNNING");
 
         if (response == null) {
             showToast("Bad Internet connection");

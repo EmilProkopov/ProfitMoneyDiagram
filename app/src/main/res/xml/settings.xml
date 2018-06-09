@@ -25,29 +25,27 @@
         android:switchTextOff="logger"
         android:switchTextOn="markets" />
 
+    <ListPreference
+        android:key="depth_limit"
+        android:title="Limit of bids/asks from one market"
+        android:summary="Max number of top bids/asks taken from one market"
+        android:defaultValue="50"
+        android:entries="@array/depth_limits"
+        android:entryValues="@array/depth_limits"
+        android:dialogTitle="Choose max number of top bids/asks taken from one market"
+        android:dependency="extract_data_directly" />
+
     <CheckBoxPreference
         android:defaultValue="false"
         android:key="bitfinex"
         android:summary="Bitfinex"
         android:title="Include data from Bitfinex"
-        android:dependency="extract_data_directly"/>
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:key="bitstamp"
-        android:summary="Bitstamp"
-        android:title="Include data from Bitstamp"
-        android:dependency="extract_data_directly"/>
+        android:dependency="extract_data_directly" />
     <CheckBoxPreference
         android:defaultValue="false"
         android:key="cex"
         android:summary="Cex"
         android:title="Include data from Cex"
-        android:dependency="extract_data_directly"/>
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:key="cryptopia"
-        android:summary="Cryptopia"
-        android:title="Include data from Cryptopia"
         android:dependency="extract_data_directly"/>
     <CheckBoxPreference
         android:defaultValue="false"

@@ -25,6 +25,39 @@ public class Asks {
     @SerializedName("bitfinex")
     @Expose
     private List<Double> bitfinex = null;
+    @SerializedName("coinsbank")
+    @Expose
+    private List<Double> coinsbank = null;
+    @SerializedName("lakebtc")
+    @Expose
+    private List<Double> lakebtc = null;
+    @SerializedName("livecoin")
+    @Expose
+    private List<Double> livecoin = null;
+
+    public List<Double> getCoinsbank() {
+        return coinsbank;
+    }
+
+    public void setCoinsbank(List<Double> coinsbank) {
+        this.coinsbank = coinsbank;
+    }
+
+    public List<Double> getLakebtc() {
+        return lakebtc;
+    }
+
+    public void setLakebtc(List<Double> lakebtc) {
+        this.lakebtc = lakebtc;
+    }
+
+    public List<Double> getLivecoin() {
+        return livecoin;
+    }
+
+    public void setLivecoin(List<Double> livecoin) {
+        this.livecoin = livecoin;
+    }
 
     public List<Double> getKraken() {
         return kraken;
