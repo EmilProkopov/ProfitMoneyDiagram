@@ -26,15 +26,6 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    //Show a text message on the screan.
-    private void showToast(String msg) {
-        Toast toast = Toast.makeText(getApplicationContext(),
-                msg,
-                Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.CENTER, 0, 0);
-        toast.show();
-    }
-
     public void startLoggerAsyncTask () {
 
         loggerAsyncTask = new LoggerAsyncTask(this);
@@ -53,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        loggerAsyncTask = null;
+        soloAsyncTask = null;
 
         sp = PreferenceManager.getDefaultSharedPreferences(this);
         if(sp.getBoolean("extract_data_directly", false)) {
@@ -60,9 +53,37 @@ public class MainActivity extends AppCompatActivity {
         } else {
             startLoggerAsyncTask();
         }
+    }
 
-        LoggerAsyncTask at = new LoggerAsyncTask(this);
-        at.execute();
+    @Override
+    protected void onStop () {
+
+        super.onStop();
+        if (loggerAsyncTask != null) {
+            loggerAsyncTask.cancel(true);
+        }
+        if (soloAsyncTask != null) {
+            soloAsyncTask.cancel(true);
+        }
+    }
+
+    @Override
+    protected void onRestart () {
+
+        super.onRestart();
+        if (loggerAsyncTask != null) {
+            loggerAsyncTask.cancel(true);
+        }
+        if (soloAsyncTask != null) {
+            soloAsyncTask.cancel(true);
+        }
+
+        sp = PreferenceManager.getDefaultSharedPreferences(this);
+        if(sp.getBoolean("extract_data_directly", false)) {
+            startSoloAsyncTask();
+        } else {
+            startLoggerAsyncTask();
+        }
     }
 
 }
