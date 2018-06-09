@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
+//Array of asks, array of bids and some methods to work with them.
 public class CompiledOrderBook {
 
     private List<PriceAmountPair> bids;
@@ -30,12 +30,13 @@ public class CompiledOrderBook {
         this.asks = asks;
     }
 
+    //Unite two CompiledOrderBooks.
     public void addAll(CompiledOrderBook otherOrderBook) {
         this.bids.addAll(otherOrderBook.getBids());
         this.asks.addAll(otherOrderBook.getAsks());
     }
 
-
+    //Comparators.
     private class PriceAmountPairComparator implements Comparator<PriceAmountPair> {
 
         @Override

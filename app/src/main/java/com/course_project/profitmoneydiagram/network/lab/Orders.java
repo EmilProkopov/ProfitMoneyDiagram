@@ -20,9 +20,7 @@ public class Orders {
         this.bids = bids;
     }
 
-    public Asks getAsks() {
-        return asks;
-    }
+    public Asks getAsks() {return asks;}
 
     public void setAsks(Asks asks) {
         this.asks = asks;

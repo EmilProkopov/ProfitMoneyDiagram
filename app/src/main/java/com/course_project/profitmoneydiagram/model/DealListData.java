@@ -6,7 +6,7 @@ import com.course_project.profitmoneydiagram.network.lab.Orders;
 import java.util.ArrayList;
 import java.util.List;
 
-//Data about deals that is sent to list adapter.
+//Data about deals that is sent to list adapter and showed in the bottom part of the screen.
 public class DealListData {
 
     private List<Double> prices;
@@ -14,6 +14,7 @@ public class DealListData {
     private List<String> names;
     private List<String> types;
 
+    //Convert data obtained from SoloAsyncTask into DealListData.
     public DealListData (OutputDataSet dataSet) {
 
         prices = new ArrayList<>();
@@ -29,7 +30,7 @@ public class DealListData {
             names.add(dataSet.getDeals().get(i).getMarketName());
         }
     }
-
+    //Convert data obtained from LoggerAsyncTask into DealListData.
     public DealListData (Orders orders) {
 
         prices = new ArrayList<>();

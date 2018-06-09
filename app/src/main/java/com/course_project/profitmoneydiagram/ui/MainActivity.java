@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onRestart () {
-
+        //Canceal previous AsyncTask and start new.
         super.onRestart();
         if (loggerAsyncTask != null) {
             loggerAsyncTask.cancel(true);

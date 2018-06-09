@@ -3,7 +3,6 @@ package com.course_project.profitmoneydiagram.asynctasks;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -12,14 +11,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.course_project.profitmoneydiagram.R;
-import com.course_project.profitmoneydiagram.api.MarketApi;
 import com.course_project.profitmoneydiagram.model.CompiledOrderBook;
 import com.course_project.profitmoneydiagram.model.Deal;
 import com.course_project.profitmoneydiagram.model.DealListData;
 import com.course_project.profitmoneydiagram.model.OrderBookGetter;
 import com.course_project.profitmoneydiagram.model.OutputDataSet;
-import com.course_project.profitmoneydiagram.network.kucoin.KucoinResponse;
-import com.course_project.profitmoneydiagram.network.lab.LabResponse;
 import com.course_project.profitmoneydiagram.ui.DealListAdapter;
 import com.course_project.profitmoneydiagram.ui.MainActivity;
 import com.github.mikephil.charting.charts.LineChart;
@@ -27,18 +23,12 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import retrofit2.Call;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-
-
+//Creates new thread, gets data from markets and displays it.
 public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet> {
 
     private static final String LOGTAG = "SoloAsyncTask";
@@ -47,8 +37,7 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
     private WeakReference<MainActivity> activityReference;
     private SharedPreferences sp;
     private String currencyPair;
-    private String secondCurrency;
-
+    private String secondCurrency; //Second currency in the pair.
 
     public SoloAsyncTask(MainActivity activity) {
 
@@ -103,16 +92,21 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
             updateCurrencyPair();
 
             //Get order books directly from markets.
+            //Get at most <limit> top asks and bids from each market.
             int limit = Integer.parseInt(sp.getString("depth_limit", "50"));
+            //Currency pair to trade.
             String currencyPair = sp.getString("currency_pares", "BTC/USD");
+            //Get orderBook with top orders from all markets.
             CompiledOrderBook orderBook = getter.getCompiledOrderBook(limit,
                                                                         activityReference,
                                                                         currencyPair);
 
-            Double profit = 0.0;
-            Double amount = 0.0;
+            Double profit = 0.0; //Profit that we can get.
+            Double amount = 0.0; //Amount of money necessary to do it.
+            //Points of the plot.
             ArrayList<Double> profitPoints = new ArrayList<>();
             ArrayList<Double> amountPoints = new ArrayList<>();
+            //List of deals to make.
             ArrayList<Deal> deals = new ArrayList<>(); //List of deals that should be made.
             final Double alpha = 0.1;
             Double optimalAmount = 0.0;
@@ -122,8 +116,7 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
 
             Double prevAmount = 0.0;
             Double prevProfit = 0.0;
-            Double firstK = -1.0;
-
+            Double firstK = -1.0; //First value of K.
             //iterators.
             int bx = 0, ax = 0;
 
@@ -136,8 +129,8 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
 
                 num += 1;
 
-                Double bidAmount = orderBook.getBids().get(bx).getAmount();
-                Double askAmount = orderBook.getAsks().get(ax).getAmount();
+                Double bidAmount = orderBook.getBids().get(bx).getAmount(); //Amount of top bid.
+                Double askAmount = orderBook.getAsks().get(ax).getAmount(); //Amount of top ask.
                 if (bidAmount.equals(0.0)) {
                     bx += 1;
                     continue;
@@ -146,7 +139,6 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
                     ax += 1;
                     continue;
                 }
-
                 //Amount of currency to buy (sell).
                 Double m = Math.min(bidAmount, askAmount);
 
@@ -159,9 +151,9 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
                 profitPoints.add(profit);
                 amountPoints.add(amount);
 
-                deals.add(new Deal("Buy", orderBook.getAsks().get(ax).getMarket()
+                deals.add(new Deal("Buy", orderBook.getAsks().get(ax).getMarketName()
                         , m, orderBook.getAsks().get(ax).getPrice()));
-                deals.add(new Deal("Sell", orderBook.getBids().get(bx).getMarket()
+                deals.add(new Deal("Sell", orderBook.getBids().get(bx).getMarketName()
                         , m, orderBook.getBids().get(bx).getPrice()));
 
                 //Take into account that we have made a deal and top bid and ask are changed.
@@ -170,6 +162,7 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
                 orderBook.getBids().get(bx).setAmount(oldBidAmount - m);
                 orderBook.getAsks().get(ax).setAmount(oldAskAmount - m);
 
+                //Check if we have achieved the optimal point.
                 if (num.equals(2)) {
                     firstK = (profit - prevProfit) / (amount - prevAmount);
                 }
@@ -193,6 +186,7 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
             outputDataSet.setProfitPoints(profitPoints);
             outputDataSet.setDeals(deals);
 
+            //Unite buy and sell deals made on same market into one deal.
             outputDataSet.uniteDealsMadeOnSameMarkets();
 
             //Display data.
@@ -230,8 +224,9 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
 
         //Display profit points on the diagram.
         LineChart chart = (LineChart) activityReference.get().findViewById(R.id.diagram);
+        //Points of the plot.
         List<Entry> chartEntries = new ArrayList<>();
-
+        //Fill the list of points.
         for (int i = 0; i < dataSet.getAmountPoints().size(); ++i) {
 
             chartEntries.add(new Entry(dataSet.getAmountPoints().get(i).floatValue()
@@ -250,6 +245,7 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
         List<Entry> optimalChartEntries = new ArrayList<>();
         optimalChartEntries.add(new Entry(optimalAmount,optimalProfit));
         LineDataSet ds2 = new LineDataSet(optimalChartEntries, "");
+
         ds2.setColor(R.color.colorPrimaryDark);
         ds2.setCircleColors(activityReference.get()
                 .getResources().getColor(R.color.diagramCircleOptimal));
@@ -263,7 +259,6 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
         chart.setNoDataText("Failed to get data \n" +
                 "Please check Internet connection");
         chart.invalidate();
-
 
         //Display optimal profit.
         ((TextView) activityReference.get().findViewById(R.id.profit_string))
@@ -284,5 +279,4 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
         list.setLayoutManager(llm);
         list.setAdapter(new DealListAdapter(dldata));
     }
-
 }

@@ -7,7 +7,6 @@ import java.util.List;
 
 public class BinanceResponse {
 
-
     @SerializedName("lastUpdateId")
     @Expose
     private Integer lastUpdateId;

@@ -1,5 +1,5 @@
 package com.course_project.profitmoneydiagram.model;
-
+//Information about deal.
 public class Deal {
         private String type;
         private String marketName;

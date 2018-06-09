@@ -7,27 +7,27 @@ import java.util.List;
 
 public class Result {
 
-@SerializedName("buy")
-@Expose
-private List<Buy> buy = null;
-@SerializedName("sell")
-@Expose
-private List<Sell> sell = null;
+    @SerializedName("buy")
+    @Expose
+    private List<Buy> buy = null;
+    @SerializedName("sell")
+    @Expose
+    private List<Sell> sell = null;
 
-public List<Buy> getBuy() {
-return buy;
-}
+    public List<Buy> getBuy() {
+        return buy;
+    }
 
-public void setBuy(List<Buy> buy) {
-this.buy = buy;
-}
+    public void setBuy(List<Buy> buy) {
+        this.buy = buy;
+    }
 
-public List<Sell> getSell() {
-return sell;
-}
+    public List<Sell> getSell() {
+        return sell;
+    }
 
-public void setSell(List<Sell> sell) {
-this.sell = sell;
-}
+    public void setSell(List<Sell> sell) {
+        this.sell = sell;
+    }
 
 }

@@ -1,16 +1,13 @@
 package com.course_project.profitmoneydiagram.model;
 
-
-
+//Stores information about one bid/ask.
 public class PriceAmountPair {
 
     private Double price;
     private Double amount;
-    private String market;
+    private String marketName;
 
-    public Double getPrice() {
-        return price;
-    }
+    public Double getPrice() {return price;}
 
     public void setPrice(Double price) {
         this.price = price;
@@ -24,11 +21,11 @@ public class PriceAmountPair {
         this.amount = amount;
     }
 
-    public String getMarket() {
-        return market;
+    public String getMarketName() {
+        return marketName;
     }
 
-    public void setMarket(String market) {
-        this.market = market;
+    public void setMarketName(String marketName) {
+        this.marketName = marketName;
     }
 }

@@ -1,12 +1,8 @@
 package com.course_project.profitmoneydiagram.api;
 
 
-import com.course_project.profitmoneydiagram.network.binance.BinanceResponse;
 import com.course_project.profitmoneydiagram.network.bitfinex.BitfinexResponse;
-import com.course_project.profitmoneydiagram.network.bitstamp.BitstampResponce;
-import com.course_project.profitmoneydiagram.network.bittrex.BittrexResponce;
 import com.course_project.profitmoneydiagram.network.cex.CexResponse;
-import com.course_project.profitmoneydiagram.network.cryptopia.CryptopiaResponse;
 import com.course_project.profitmoneydiagram.network.exmo.ExmoResponse;
 import com.course_project.profitmoneydiagram.network.gdax.GdaxResponse;
 import com.course_project.profitmoneydiagram.network.kucoin.KucoinResponse;
@@ -53,5 +49,5 @@ public interface MarketApi {
                                             @Query("limit") String limit);
 
     @GET("/")
-    Call<List<LabResponse>> getLabResponse(@Query("pair") String pair);
+    Call<List<LabResponse>> getLoggerResponse(@Query("pair") String pair);
 }
