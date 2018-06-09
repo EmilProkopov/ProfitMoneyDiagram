@@ -1,17 +1,19 @@
 package com.course_project.profitmoneydiagram.model;
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.course_project.profitmoneydiagram.api.MarketApi;
 import com.course_project.profitmoneydiagram.network.bitfinex.BitfinexResponse;
-import com.course_project.profitmoneydiagram.network.bitstamp.BitstampResponce;
 import com.course_project.profitmoneydiagram.network.cex.CexResponse;
-import com.course_project.profitmoneydiagram.network.cryptopia.CryptopiaResponse;
 import com.course_project.profitmoneydiagram.network.exmo.ExmoResponse;
 import com.course_project.profitmoneydiagram.network.gdax.GdaxResponse;
 import com.course_project.profitmoneydiagram.network.kucoin.KucoinResponse;
+import com.course_project.profitmoneydiagram.ui.MainActivity;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,66 +26,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class OrderBookGetter {
 
-    //private static final String LOGTAG = "OrderBookGetter";
     private static final String LOGTAG = "OrderBookGetter";
 
     private MarketApi api;
     private Retrofit retrofit;
 
-    private List<PriceAmountPair> bids = null;
-    private List<PriceAmountPair> asks = null;
 
-
-    public OrderBookGetter () {
-
-        bids = new ArrayList<PriceAmountPair>();
-        asks = new ArrayList<PriceAmountPair>();
-    }
-
-
-    /*JSON not parsing
-    private BinanceResponse getBinanceResponse (int limit) {
-
-        Log.e(LOGTAG, "YAP");
-
-        retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.binance.com") //Базовая часть адреса
-                .addConverterFactory(GsonConverterFactory.create())
-                //Конвертер, необходимый для преобразования JSON'а в объекты
-                .build();
-
-        api = retrofit.create(MarketApi.class);
-        //Создаем объект, при помощи которого будем выполнять запросы
-
-        String strLimit = String.valueOf(limit);
-        Call<BinanceResponse> responseCall = api.getBinanceOrderBook("BTCUSDT", strLimit);
-
-        Response<BinanceResponse> res;
-
-        BinanceResponse binanceResponse = null;
-        try {
-            res = responseCall.execute();
-            binanceResponse = res.body();
-        } catch (IOException e) {
-            Log.e(LOGTAG, e.toString());
-        }
-
-        return binanceResponse;
-    }
-
-    private List<PriceAmountPair> getBinanceCleanOrderBook(int limit) {
-        BinanceResponse responce = getBinanceResponse(limit);
-
-        if (responce == null) Log.e(LOGTAG, "GOT NULL RESPONCE");
-        else Log.e(LOGTAG, "GOT NOT NULL RESPONCE");
-
-        //Log.e(LOGTAG, Integer.toString(responce.getAsks().size()));
-        return new ArrayList<>();
-    }*/
-
-
-
-    private BitfinexResponse getBitfinexResponse (int limit) {
+    private BitfinexResponse getBitfinexResponse (int limit, String currencyPair) {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.bitfinex.com")
@@ -94,7 +43,14 @@ public class OrderBookGetter {
 
         String strLimit = String.valueOf(limit);
 
-        Call<BitfinexResponse> responseCall = api.getBitfinexOrderBook(strLimit, strLimit, "1");
+        Call<BitfinexResponse> responseCall = null;
+        if (currencyPair.equals("BTC/USD")) {
+            responseCall = api.getBitfinexOrderBookBTCUSD(strLimit,
+                                                                    strLimit, "1");
+        } else if (currencyPair.equals("ETH/USD")) {
+            responseCall = api.getBitfinexOrderBookETHUSD(strLimit,
+                                                                    strLimit, "1");
+        }
 
         Response<BitfinexResponse> res;
 
@@ -109,10 +65,10 @@ public class OrderBookGetter {
         return bitfinexResponse;
     }
 
-    private CompiledOrderBook getBitfinexCleanOrderBook(int limit) {
+    private CompiledOrderBook getBitfinexCleanOrderBook(int limit, String currencyPair) {
 
-        BitfinexResponse responce = null;
-        responce = getBitfinexResponse(limit);
+        BitfinexResponse responce;
+        responce = getBitfinexResponse(limit, currencyPair);
 
 
         if(responce != null) {
@@ -155,115 +111,7 @@ public class OrderBookGetter {
 
 
 
-    private BitstampResponce getBitstampResponse () {
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://www.bitstamp.net") //Базовая часть адреса
-                .addConverterFactory(GsonConverterFactory.create())
-                //Конвертер, необходимый для преобразования JSON'а в объекты
-                .build();
-
-        api = retrofit.create(MarketApi.class);
-        //Создаем объект, при помощи которого будем выполнять запросы
-
-        Call<BitstampResponce> responseCall = api.getBitstampOrderBookBTCUSDT();
-
-        Response<BitstampResponce> res;
-
-        BitstampResponce bitstampResponce = null;
-        try {
-            res = responseCall.execute();
-            bitstampResponce = res.body();
-        } catch (IOException e) {
-            Log.e(LOGTAG, "IO");
-        }
-
-        return bitstampResponce;
-    }
-
-    private CompiledOrderBook getBitstampCleanOrderBook() {
-
-
-        BitstampResponce responce = null;
-        responce = getBitstampResponse();
-
-        if(responce != null) {
-            Log.e(LOGTAG, "Bitstamp OK");
-        } else {
-            Log.e(LOGTAG, "Bitstamp FAIL");
-            return new CompiledOrderBook();
-        }
-
-        CompiledOrderBook res = new CompiledOrderBook();
-        ArrayList <PriceAmountPair> curAsks = new ArrayList<>();
-        ArrayList <PriceAmountPair> curBids = new ArrayList<>();
-
-        for(int i = 0; i < responce.getAsks().size(); ++i) {
-
-            PriceAmountPair curPriceQtyPair = new PriceAmountPair();
-
-            curPriceQtyPair.setPrice(Double.parseDouble(responce.getAsks().get(i).get(0)));
-            curPriceQtyPair.setAmount(Double.parseDouble(responce.getAsks().get(i).get(1)));
-            curPriceQtyPair.setMarket("Bitstamp");
-
-            curAsks.add(curPriceQtyPair);
-        }
-        res.setAsks(curAsks);
-
-        for(int i = 0; i < responce.getBids().size(); ++i) {
-
-            PriceAmountPair curPriceQtyPair = new PriceAmountPair();
-
-            curPriceQtyPair.setPrice(Double.parseDouble(responce.getBids().get(i).get(0)));
-            curPriceQtyPair.setAmount(Double.parseDouble(responce.getBids().get(i).get(1)));
-            curPriceQtyPair.setMarket("Bitstamp");
-
-            curBids.add(curPriceQtyPair);
-        }
-        res.setBids(curBids);
-
-        return res;
-    }
-
-
-    /* Нет маркета BTC-USDT
-    private BittrexResponce getBittrexResponse () {
-
-        retrofit = new Retrofit.Builder()
-                .baseUrl("https://bittrex.com") //Базовая часть адреса
-                .addConverterFactory(GsonConverterFactory.create())
-                //Конвертер, необходимый для преобразования JSON'а в объекты
-                .build();
-
-        api = retrofit.create(MarketApi.class);
-        //Создаем объект, при помощи которого будем выполнять запросы
-
-        Call<BittrexResponce> responseCall = api.getBittrexOrderBook("BTC-USDT", "both");
-
-        Response<BittrexResponce> res;
-
-        BittrexResponce bittrexResponse = null;
-        try {
-            res = responseCall.execute();
-            bittrexResponse = res.body();
-        } catch (IOException e) {
-            Log.e(LOGTAG, e.toString());
-        }
-
-        return bittrexResponse;
-    }
-
-    private List<PriceAmountPair> getBittrexCleanOrderBook() {
-        BittrexResponce responce = getBittrexResponse();
-
-
-        Log.e(LOGTAG, Integer.toString(responce.getResult().getBuy().size()));
-        return new ArrayList<>();
-    }*/
-
-
-
-    private CexResponse getCexPartResponse(int limit) {
+    private CexResponse getCexPartResponse(int limit, String currencyPair) {
 
         retrofit = new Retrofit.Builder()
                 .baseUrl("https://cex.io") //Базовая часть адреса
@@ -275,7 +123,13 @@ public class OrderBookGetter {
         //Создаем объект, при помощи которого будем выполнять запросы
 
         String strLimit = String.valueOf(limit);
-        Call<CexResponse> responseCall = api.getCexPartOrderBookBTCUSDT(strLimit);
+
+        Call<CexResponse> responseCall = null;
+        if (currencyPair.equals("BTC/USD")) {
+           responseCall = api.getCexPartOrderBookBTCUSDT(strLimit);
+        } else if (currencyPair.equals("ETH/USD")) {
+            responseCall = api.getCexPartOrderBookETHUSDT(strLimit);
+        }
 
         Response<CexResponse> res;
 
@@ -290,10 +144,10 @@ public class OrderBookGetter {
         return cexResponse;
     }
 
-    private CompiledOrderBook getCexPartCleanOrderBook(int limit) {
+    private CompiledOrderBook getCexPartCleanOrderBook(int limit, String currencyPair) {
 
-        CexResponse response = null;
-        response = getCexPartResponse(limit);
+        CexResponse response;
+        response = getCexPartResponse(limit, currencyPair);
 
 
         if(response != null) {
@@ -335,92 +189,23 @@ public class OrderBookGetter {
     }
 
 
-
-    private CryptopiaResponse getCryptopiaResponseBTCUSTD () {
-
-        retrofit = new Retrofit.Builder()
-                .baseUrl("https://www.cryptopia.co.nz") //Базовая часть адреса
-                .addConverterFactory(GsonConverterFactory.create())
-                //Конвертер, необходимый для преобразования JSON'а в объекты
-                .build();
-
-        api = retrofit.create(MarketApi.class);
-        //Создаем объект, при помощи которого будем выполнять запросы
-
-        Call<CryptopiaResponse> responseCall = api.getCryptopiaOrderBookBTCUSDT();
-
-        Response<CryptopiaResponse> res;
-
-        CryptopiaResponse cryptopiaResponse = null;
-        try {
-            res = responseCall.execute();
-            cryptopiaResponse = res.body();
-        } catch (IOException e) {
-            Log.e(LOGTAG, e.toString());
-        }
-
-        return cryptopiaResponse;
-    }
-
-    private CompiledOrderBook getCryptopiaCleanOrderBookBTCUSTD() {
-
-        CryptopiaResponse responce = null;
-        responce = getCryptopiaResponseBTCUSTD();
-
-        if(responce != null) {
-            Log.e(LOGTAG, "Cryptopia OK");
-        } else {
-            Log.e(LOGTAG, "Cryptopia FAIL");
-            return new CompiledOrderBook();
-        }
-
-        CompiledOrderBook res = new CompiledOrderBook();
-        ArrayList <PriceAmountPair> curAsks = new ArrayList<>();
-        ArrayList <PriceAmountPair> curBids = new ArrayList<>();
-
-        for(int i = 0; i < responce.getData().getBuy().size(); ++i) {
-
-            PriceAmountPair curPriceQtyPair = new PriceAmountPair();
-
-            curPriceQtyPair.setPrice(responce.getData().getBuy().get(i).getPrice());
-            curPriceQtyPair.setAmount(responce.getData().getBuy().get(i).getVolume());
-            curPriceQtyPair.setMarket("Cryptopia");
-
-            curAsks.add(curPriceQtyPair);
-        }
-        res.setAsks(curAsks);
-
-        for(int i = 0; i < responce.getData().getSell().size(); ++i) {
-
-            PriceAmountPair curPriceQtyPair = new PriceAmountPair();
-
-            curPriceQtyPair.setPrice(responce.getData().getSell().get(i).getPrice());
-            curPriceQtyPair.setAmount(responce.getData().getSell().get(i).getVolume());
-            curPriceQtyPair.setMarket("Cryptopia");
-
-            curBids.add(curPriceQtyPair);
-        }
-        res.setBids(curBids);
-
-        return res;
-    }
-
-
-
-    private ExmoResponse getExmoResponseBTCUSTD (int limit) {
+    private ExmoResponse getExmoResponseBTCUSTD (int limit, String currencyPair) {
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.exmo.com") //Базовая часть адреса
+                .baseUrl("https://api.exmo.com")
                 .addConverterFactory(GsonConverterFactory.create())
-                //Конвертер, необходимый для преобразования JSON'а в объекты
                 .build();
 
         api = retrofit.create(MarketApi.class);
-        //Создаем объект, при помощи которого будем выполнять запросы
 
         String strLimit = String.valueOf(limit);
 
-        Call<ExmoResponse> responseCall = api.getExmoOrderBook("BTC_USDT", strLimit);
+        Call<ExmoResponse> responseCall = null;
+        if (currencyPair.equals("BTC/USD")) {
+            responseCall = api.getExmoOrderBook("BTC_USD", strLimit);
+        } else if(currencyPair.equals("ETH/USD")) {
+            responseCall = api.getExmoOrderBook("ETH_USD", strLimit);
+        }
 
         Response<ExmoResponse> res;
 
@@ -435,10 +220,10 @@ public class OrderBookGetter {
         return exmoResponse;
     }
 
-    private CompiledOrderBook getExmoCleanOrderBookBTCUSTD(int limit) {
+    private CompiledOrderBook getExmoCleanOrderBook(int limit, String currencyPair) {
 
         ExmoResponse responce;
-        responce = getExmoResponseBTCUSTD(limit);
+        responce = getExmoResponseBTCUSTD(limit, currencyPair);
 
         if(responce != null) {
             Log.e(LOGTAG, "Exmo OK");
@@ -451,29 +236,58 @@ public class OrderBookGetter {
         ArrayList <PriceAmountPair> curAsks = new ArrayList<>();
         ArrayList <PriceAmountPair> curBids = new ArrayList<>();
 
-        for(int i = 0; i < responce.getBTCUSDT().getAsk().size(); ++i) {
+        if (currencyPair.equals("BCT/USD")) {
 
-            PriceAmountPair curPriceQtyPair = new PriceAmountPair();
+            for (int i = 0; i < responce.getBTCUSD().getAsk().size(); ++i) {
 
-            curPriceQtyPair.setPrice(Double.parseDouble(responce.getBTCUSDT().getAsk().get(i).get(0)));
-            curPriceQtyPair.setAmount(Double.parseDouble(responce.getBTCUSDT().getAsk().get(i).get(1)));
-            curPriceQtyPair.setMarket("Exmo");
+                PriceAmountPair curPriceQtyPair = new PriceAmountPair();
 
-            curAsks.add(curPriceQtyPair);
+                curPriceQtyPair.setPrice(Double.parseDouble(responce.getBTCUSD().getAsk().get(i).get(0)));
+                curPriceQtyPair.setAmount(Double.parseDouble(responce.getBTCUSD().getAsk().get(i).get(1)));
+                curPriceQtyPair.setMarket("Exmo");
+
+                curAsks.add(curPriceQtyPair);
+            }
+            res.setAsks(curAsks);
+
+            for (int i = 0; i < responce.getBTCUSD().getBid().size(); ++i) {
+
+                PriceAmountPair curPriceQtyPair = new PriceAmountPair();
+
+                curPriceQtyPair.setPrice(Double.parseDouble(responce.getBTCUSD().getBid().get(i).get(0)));
+                curPriceQtyPair.setAmount(Double.parseDouble(responce.getBTCUSD().getBid().get(i).get(1)));
+                curPriceQtyPair.setMarket("Exmo");
+
+                curBids.add(curPriceQtyPair);
+            }
+            res.setBids(curBids);
         }
-        res.setAsks(curAsks);
+        else if (currencyPair.equals("ETH/USD")) {
 
-        for(int i = 0; i < responce.getBTCUSDT().getBid().size(); ++i) {
+            for (int i = 0; i < responce.getETHUSD().getAsk().size(); ++i) {
 
-            PriceAmountPair curPriceQtyPair = new PriceAmountPair();
+                PriceAmountPair curPriceQtyPair = new PriceAmountPair();
 
-            curPriceQtyPair.setPrice(Double.parseDouble(responce.getBTCUSDT().getBid().get(i).get(0)));
-            curPriceQtyPair.setAmount(Double.parseDouble(responce.getBTCUSDT().getBid().get(i).get(1)));
-            curPriceQtyPair.setMarket("Exmo");
+                curPriceQtyPair.setPrice(Double.parseDouble(responce.getETHUSD().getAsk().get(i).get(0)));
+                curPriceQtyPair.setAmount(Double.parseDouble(responce.getETHUSD().getAsk().get(i).get(1)));
+                curPriceQtyPair.setMarket("Exmo");
 
-            curBids.add(curPriceQtyPair);
+                curAsks.add(curPriceQtyPair);
+            }
+            res.setAsks(curAsks);
+
+            for (int i = 0; i < responce.getETHUSD().getBid().size(); ++i) {
+
+                PriceAmountPair curPriceQtyPair = new PriceAmountPair();
+
+                curPriceQtyPair.setPrice(Double.parseDouble(responce.getETHUSD().getBid().get(i).get(0)));
+                curPriceQtyPair.setAmount(Double.parseDouble(responce.getETHUSD().getBid().get(i).get(1)));
+                curPriceQtyPair.setMarket("Exmo");
+
+                curBids.add(curPriceQtyPair);
+            }
+            res.setBids(curBids);
         }
-        res.setBids(curBids);
 
         return res;
     }
@@ -481,18 +295,21 @@ public class OrderBookGetter {
 
 
 
-    private GdaxResponse getGdaxResponseTop50BTCUSTD () {
+    private GdaxResponse getGdaxResponseTop50BTCUSTD (String currencyPair) {
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.gdax.com") //Базовая часть адреса
+                .baseUrl("https://api.gdax.com")
                 .addConverterFactory(GsonConverterFactory.create())
-                //Конвертер, необходимый для преобразования JSON'а в объекты
                 .build();
 
         api = retrofit.create(MarketApi.class);
-        //Создаем объект, при помощи которого будем выполнять запросы
 
-        Call<GdaxResponse> responseCall = api.getGdaxOrderBookBTCUSD("2");
+        Call<GdaxResponse> responseCall = null;
+        if (currencyPair.equals("BTC/USD")) {
+            responseCall = api.getGdaxOrderBookBTCUSD("2");
+        } else if (currencyPair.equals("ETH/USD")) {
+            responseCall = api.getGdaxOrderBookETHUSD("2");
+        }
 
         Response<GdaxResponse> res;
 
@@ -507,10 +324,10 @@ public class OrderBookGetter {
         return gdaxResponse;
     }
 
-    private CompiledOrderBook getGdaxTop50CleanOrderBookBTCUSTD() {
+    private CompiledOrderBook getGdaxTop50CleanOrderBook(String currencyPair) {
 
-        GdaxResponse responce = null;
-        responce = getGdaxResponseTop50BTCUSTD();
+        GdaxResponse responce;
+        responce = getGdaxResponseTop50BTCUSTD(currencyPair);
 
         if(responce != null) {
             Log.e(LOGTAG, "Gdax OK");
@@ -553,7 +370,7 @@ public class OrderBookGetter {
 
 
 
-    private KucoinResponse getKucoinResponseBTCUSTD (int limit) {
+    private KucoinResponse getKucoinResponseBTCUSTD (int limit, String currencyPair) {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.kucoin.com") //Базовая часть адреса
@@ -566,7 +383,12 @@ public class OrderBookGetter {
 
         String strLimit = String.valueOf(limit);
 
-        Call<KucoinResponse> responseCall = api.getKucoinOrderBook("BTC-USDT", strLimit);
+        Call<KucoinResponse> responseCall = null;
+        if (currencyPair.equals("BTC/USD")) {
+            responseCall = api.getKucoinOrderBook("BTC-USDT", strLimit);
+        } else if (currencyPair.equals("ETH/USD")) {
+            responseCall = api.getKucoinOrderBook("ETH-USDT", strLimit);
+        }
 
         Response<KucoinResponse> res;
 
@@ -581,10 +403,10 @@ public class OrderBookGetter {
         return kucoinResponse;
     }
 
-    private CompiledOrderBook getKucoinCleanOrderBookBTCUSTD(int limit) {
+    private CompiledOrderBook getKucoinCleanOrderBook(int limit, String currencyPair) {
 
-        KucoinResponse responce = null;
-        responce = getKucoinResponseBTCUSTD(limit);
+        KucoinResponse responce;
+        responce = getKucoinResponseBTCUSTD(limit, currencyPair);
 
         if(responce != null) {
             Log.e(LOGTAG, "Kucoin OK");
@@ -627,23 +449,33 @@ public class OrderBookGetter {
 
 
 
-    public CompiledOrderBook getCompiledOrderBook(int limit) {
+    public CompiledOrderBook getCompiledOrderBook(int limit,
+                                                  WeakReference <MainActivity> activityReference,
+                                                  String currencyPair) {
 
         CompiledOrderBook result = new CompiledOrderBook();
 
-        result.addAll(getBitfinexCleanOrderBook(limit));
-        //result.addAll(getBitstampCleanOrderBook()); //Strange results
-        result.addAll(getCexPartCleanOrderBook(limit));
-       // result.addAll(getCryptopiaCleanOrderBookBTCUSTD()); //Strangely high results
-        result.addAll(getExmoCleanOrderBookBTCUSTD(limit));
-        result.addAll(getGdaxTop50CleanOrderBookBTCUSTD());
-        result.addAll(getKucoinCleanOrderBookBTCUSTD(limit));
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(activityReference.get());
 
+        if (sp.getBoolean("bitfinex", true)) {
+            result.addAll(getBitfinexCleanOrderBook(limit, currencyPair));
+        }
+        if (sp.getBoolean("cex", true)) {
+            result.addAll(getCexPartCleanOrderBook(limit, currencyPair));
+        }
+        if (sp.getBoolean("exmo", true)) {
+            result.addAll(getExmoCleanOrderBook(limit, currencyPair));
+        }
+        if (sp.getBoolean("gdax", true)) {
+            result.addAll(getGdaxTop50CleanOrderBook(currencyPair));
+        }
+        if (sp.getBoolean("kucoin", true)) {
+            result.addAll(getKucoinCleanOrderBook(limit, currencyPair));
+        }
+
+        //result.addAll(getBitstampCleanOrderBook()); //Strange results
+        // result.addAll(getCryptopiaCleanOrderBookBTCUSTD()); //Strangely high results
         result.sort();
-        /*Log.e("AAAAAAAAAAAAAAAAAAAAAAA", result.getAsks().size()+"");
-        for(int i = 0; i < result.getAsks().size(); i++) {
-            Log.e(LOGTAG, Double.toString(result.getAsks().get(i).getPrice())+"----"+Double.toString(result.getAsks().get(i).getAmount()));
-        }*/
 
         return result;
     }

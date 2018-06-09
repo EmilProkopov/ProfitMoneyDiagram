@@ -20,29 +20,24 @@ import retrofit2.http.Query;
 
 //Used to form a Retrofit request.
 public interface MarketApi {
-    @GET("/api/v1/depth")
-    Call<BinanceResponse> getBinanceOrderBook(@Query("symbol") String symbol,
-                                              @Query("limit") String limit);
 
     @GET("/v1/book/btcusd")
-    Call<BitfinexResponse> getBitfinexOrderBook(@Query("limit_bids") String limitBids,
-                                                @Query("limit_asks") String limitAsks,
-                                                @Query("group") String group);
+    Call<BitfinexResponse> getBitfinexOrderBookBTCUSD(@Query("limit_bids") String limitBids,
+                                                      @Query("limit_asks") String limitAsks,
+                                                      @Query("group") String group);
 
-
-    @GET("/api/v2/order_book/btcusd/")
-    Call<BitstampResponce> getBitstampOrderBookBTCUSDT();
-
-    @GET("/api/v1.1/public/getorderbook")
-    Call<BittrexResponce> getBittrexOrderBook(@Query("market") String market,
-                                              @Query("type") String type);
+    @GET("/v1/book/ethusd")
+    Call<BitfinexResponse> getBitfinexOrderBookETHUSD(@Query("limit_bids") String limitBids,
+                                                      @Query("limit_asks") String limitAsks,
+                                                      @Query("group") String group);
 
 
     @GET("/api/order_book/BTC/USD/")
     Call<CexResponse> getCexPartOrderBookBTCUSDT(@Query("depth") String depth);
 
-    @GET("/api/GetMarketOrders/BTC_USDT/1000")
-    Call<CryptopiaResponse> getCryptopiaOrderBookBTCUSDT();
+    @GET("/api/order_book/ETH/USD/")
+    Call<CexResponse> getCexPartOrderBookETHUSDT(@Query("depth") String depth);
+
 
     @GET("/v1/order_book/")
     Call<ExmoResponse> getExmoOrderBook(@Query("pair") String pair, @Query("limit") String limit);
@@ -50,10 +45,13 @@ public interface MarketApi {
     @GET("/products/BTC-USD/book")
     Call<GdaxResponse> getGdaxOrderBookBTCUSD(@Query("level") String level);
 
+    @GET("/products/ETH-USD/book")
+    Call<GdaxResponse> getGdaxOrderBookETHUSD(@Query("level") String level);
+
     @GET("/v1/open/orders")
     Call<KucoinResponse> getKucoinOrderBook(@Query("symbol") String symbol,
                                             @Query("limit") String limit);
 
     @GET("/")
-    Call<List<LabResponse>> getLabResponce(@Query("pair") String pair);
+    Call<List<LabResponse>> getLabResponse(@Query("pair") String pair);
 }

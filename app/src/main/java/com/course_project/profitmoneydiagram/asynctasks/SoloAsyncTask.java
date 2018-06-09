@@ -64,8 +64,10 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
     private void showToast(String msg) {
         Toast toast = Toast.makeText(activityReference.get().getApplicationContext(),
                 msg,
-                Toast.LENGTH_SHORT);
+                Toast.LENGTH_LONG);
         toast.setGravity(Gravity.CENTER, 0, 0);
+        TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
+        if( v != null) v.setGravity(Gravity.CENTER);
         toast.show();
     }
 
@@ -102,7 +104,10 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
 
             //Get order books directly from markets.
             int limit = Integer.parseInt(sp.getString("depth_limit", "50"));
-            CompiledOrderBook orderBook = getter.getCompiledOrderBook(limit);
+            String currencyPair = sp.getString("currency_pares", "BTC/USD");
+            CompiledOrderBook orderBook = getter.getCompiledOrderBook(limit,
+                                                                        activityReference,
+                                                                        currencyPair);
 
             Double profit = 0.0;
             Double amount = 0.0;
@@ -218,8 +223,8 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
         OutputDataSet dataSet = params[0];
         Log.e(LOGTAG, "SoloAsyncTask RUNNING");
 
-        if (dataSet.getAmountPoints().size() == 0) {
-            showToast("Bad Internet connection");
+        if (dataSet.getDeals().size() <= 1) {
+            showToast("No profit can be made.\nCheck Internet connection\nand number of active markets.");
             return;
         }
 

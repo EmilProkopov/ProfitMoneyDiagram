@@ -1,11 +1,11 @@
 package com.course_project.profitmoneydiagram.network.exmo;
 
+import java.util.List;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.List;
-
-public class BTCUSDT {
+public class BTCUSD {
 
     @SerializedName("ask_quantity")
     @Expose

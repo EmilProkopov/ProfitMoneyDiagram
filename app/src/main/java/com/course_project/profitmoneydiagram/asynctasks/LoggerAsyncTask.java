@@ -1,12 +1,8 @@
 package com.course_project.profitmoneydiagram.asynctasks;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -16,10 +12,7 @@ import android.widget.Toast;
 
 import com.course_project.profitmoneydiagram.R;
 import com.course_project.profitmoneydiagram.api.MarketApi;
-import com.course_project.profitmoneydiagram.model.CompiledOrderBook;
 import com.course_project.profitmoneydiagram.model.DealListData;
-import com.course_project.profitmoneydiagram.model.OutputDataSet;
-import com.course_project.profitmoneydiagram.network.kucoin.KucoinResponse;
 import com.course_project.profitmoneydiagram.network.lab.LabResponse;
 import com.course_project.profitmoneydiagram.ui.DealListAdapter;
 import com.course_project.profitmoneydiagram.ui.MainActivity;
@@ -114,9 +107,9 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
                 labResponse = null; //Delete previous response.
 
                 if (currencyPair.equals("BTC/USD")) {
-                    responseCall = api.getLabResponce("btc_usd");
+                    responseCall = api.getLabResponse("btc_usd");
                 } else if (currencyPair.equals("ETH/USD")) {
-                    responseCall = api.getLabResponce("eth_usd");
+                    responseCall = api.getLabResponse("eth_usd");
                 }
                 res = responseCall.execute();
                 labResponse = res.body().get(0);

@@ -36,31 +36,31 @@
         android:dependency="extract_data_directly" />
 
     <CheckBoxPreference
-        android:defaultValue="false"
+        android:defaultValue="true"
         android:key="bitfinex"
         android:summary="Bitfinex"
         android:title="Include data from Bitfinex"
         android:dependency="extract_data_directly" />
     <CheckBoxPreference
-        android:defaultValue="false"
+        android:defaultValue="true"
         android:key="cex"
         android:summary="Cex"
         android:title="Include data from Cex"
         android:dependency="extract_data_directly"/>
     <CheckBoxPreference
-        android:defaultValue="false"
+        android:defaultValue="true"
         android:key="exmo"
         android:summary="Exmo"
         android:title="Include data from Exmo"
         android:dependency="extract_data_directly"/>
     <CheckBoxPreference
-        android:defaultValue="false"
+        android:defaultValue="true"
         android:key="gdax"
         android:summary="Gdax"
         android:title="Include data from Gdax"
         android:dependency="extract_data_directly"/>
     <CheckBoxPreference
-        android:defaultValue="false"
+        android:defaultValue="true"
         android:key="kucoin"
         android:summary="Kucoin"
         android:title="Include data from Kucoin"

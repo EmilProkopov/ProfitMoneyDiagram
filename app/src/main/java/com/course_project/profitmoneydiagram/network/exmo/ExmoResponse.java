@@ -5,16 +5,27 @@ import com.google.gson.annotations.SerializedName;
 
 public class ExmoResponse {
 
-@SerializedName("BTC_USDT")
-@Expose
-private BTCUSDT bTCUSDT;
+    @SerializedName("BTC_USD")
+    @Expose
+    private BTCUSD BTCUSD;
 
-public BTCUSDT getBTCUSDT() {
-return bTCUSDT;
-}
+    @SerializedName("ETH_USD")
+    @Expose
+    private ETHUSD ETHUSD;
 
-public void setBTCUSDT(BTCUSDT bTCUSDT) {
-this.bTCUSDT = bTCUSDT;
-}
+    public com.course_project.profitmoneydiagram.network.exmo.BTCUSD getBTCUSD() {
+        return BTCUSD;
+    }
 
+    public void setBTCUSD(com.course_project.profitmoneydiagram.network.exmo.BTCUSD BTCUSD) {
+        this.BTCUSD = BTCUSD;
+    }
+
+    public com.course_project.profitmoneydiagram.network.exmo.ETHUSD getETHUSD() {
+        return ETHUSD;
+    }
+
+    public void setETHUSD(com.course_project.profitmoneydiagram.network.exmo.ETHUSD ETHUSD) {
+        this.ETHUSD = ETHUSD;
+    }
 }
