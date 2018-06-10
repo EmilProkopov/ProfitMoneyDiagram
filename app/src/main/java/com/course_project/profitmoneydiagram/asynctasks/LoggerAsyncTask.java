@@ -185,8 +185,8 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
         LineData ld = new LineData(lineDataSets);
 
         chart.setData(ld);
-        chart.setNoDataText("Failed to get data \n" +
-                "Please check Internet connection");
+        chart.getDescription().setText("Horizontal: amount; Vertical: profit");
+        chart.getLegend().setEnabled(false);
         chart.invalidate();
 
         //Display optimal profit.

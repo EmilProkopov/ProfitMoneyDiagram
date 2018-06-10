@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.course_project.profitmoneydiagram.R;
 import com.course_project.profitmoneydiagram.asynctasks.LoggerAsyncTask;
 import com.course_project.profitmoneydiagram.asynctasks.SoloAsyncTask;
+import com.github.mikephil.charting.charts.LineChart;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -47,6 +48,9 @@ public class MainActivity extends AppCompatActivity {
         loggerAsyncTask = null;
         soloAsyncTask = null;
 
+        LineChart chart = findViewById(R.id.diagram);
+        chart.setNoDataText("Please wait. Data receiving may take up to 10 seconds");
+
         sp = PreferenceManager.getDefaultSharedPreferences(this);
         if(sp.getBoolean("extract_data_directly", false)) {
             startSoloAsyncTask();
@@ -69,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onRestart () {
-        //Canceal previous AsyncTask and start new.
+        //Cancel previous AsyncTask and start new.
         super.onRestart();
         if (loggerAsyncTask != null) {
             loggerAsyncTask.cancel(true);
