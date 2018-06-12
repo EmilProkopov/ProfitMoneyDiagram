@@ -191,10 +191,10 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
 
         //Display optimal profit.
         ((TextView) activityReference.get().findViewById(R.id.profit_string))
-                .setText((Math.round(optimalProfit * 100) / 100.0) + " " + secondCurrency);
+                .setText("Profit: "+(Math.round(optimalProfit * 100) / 100.0)+ " " +secondCurrency);
         //Display optimal amount.
         ((TextView) activityReference.get().findViewById(R.id.amount_string))
-                .setText((Math.round(optimalAmount * 100) / 100.0) + " " + secondCurrency);
+                .setText("Amount: "+(Math.round(optimalAmount * 100) / 100.0)+ " " +secondCurrency);
         //Display current currency pair.
         ((TextView) activityReference.get().findViewById(R.id.currency_pair)).setText(currencyPair);
 

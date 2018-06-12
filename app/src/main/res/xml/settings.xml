@@ -27,8 +27,8 @@
 
     <ListPreference
         android:key="depth_limit"
-        android:title="Limit of bids/asks from one marketName"
-        android:summary="Max number of top bids/asks taken from one marketName"
+        android:title="Limit of bids/asks from one market"
+        android:summary="Max number of top bids/asks taken from one market"
         android:defaultValue="50"
         android:entries="@array/depth_limits"
         android:entryValues="@array/depth_limits"
