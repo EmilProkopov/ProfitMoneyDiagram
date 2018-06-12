@@ -41,10 +41,10 @@ public class OrderBookGetter {
 
         Call<BitfinexResponse> responseCall = null;
         if (currencyPair.equals("BTC/USD")) {
-            responseCall = api.getBitfinexOrderBookBTCUSD(strLimit,
+            responseCall = api.getBitfinexOrderBook("btcusd", strLimit,
                     strLimit, "1");
         } else if (currencyPair.equals("ETH/USD")) {
-            responseCall = api.getBitfinexOrderBookETHUSD(strLimit,
+            responseCall = api.getBitfinexOrderBook("ethusd", strLimit,
                     strLimit, "1");
         }
 
@@ -117,9 +117,9 @@ public class OrderBookGetter {
 
         Call<CexResponse> responseCall = null;
         if (currencyPair.equals("BTC/USD")) {
-           responseCall = api.getCexPartOrderBookBTCUSDT(strLimit);
+           responseCall = api.getCexPartOrderBook("BTC", "USD", strLimit);
         } else if (currencyPair.equals("ETH/USD")) {
-            responseCall = api.getCexPartOrderBookETHUSDT(strLimit);
+            responseCall = api.getCexPartOrderBook("ETH", "USD", strLimit);
         }
 
         Response<CexResponse> res;
@@ -282,7 +282,7 @@ public class OrderBookGetter {
     }
 
 
-    private GdaxResponse getGdaxResponseTop50BTCUSTD (String currencyPair) {
+    private GdaxResponse getGdaxResponseTop50 (String currencyPair) {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.gdax.com")
@@ -293,9 +293,9 @@ public class OrderBookGetter {
 
         Call<GdaxResponse> responseCall = null;
         if (currencyPair.equals("BTC/USD")) {
-            responseCall = api.getGdaxOrderBookBTCUSD("2");
+            responseCall = api.getGdaxOrderBook("BTC-USD", "2");
         } else if (currencyPair.equals("ETH/USD")) {
-            responseCall = api.getGdaxOrderBookETHUSD("2");
+            responseCall = api.getGdaxOrderBook("ETH-USD", "2");
         }
 
         Response<GdaxResponse> res;
@@ -314,7 +314,7 @@ public class OrderBookGetter {
     private CompiledOrderBook getGdaxTop50CleanOrderBook(String currencyPair) {
 
         GdaxResponse responce;
-        responce = getGdaxResponseTop50BTCUSTD(currencyPair);
+        responce = getGdaxResponseTop50(currencyPair);
 
         if(responce != null) {
             Log.e(LOGTAG, "Gdax OK");
