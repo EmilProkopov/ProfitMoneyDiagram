@@ -67,7 +67,7 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
         try {
             updateRateSeconds = Integer.parseInt(sp.getString("update_rate", "10"));
         } catch (java.lang.RuntimeException e) {
-            Log.e(LOGTAG, "Wrong formatted string: update rate");
+            Log.d(LOGTAG, "Wrong formatted string: update rate");
             updateRateSeconds = 10;
         }
     }
@@ -115,7 +115,7 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
                 res = responseCall.execute();
                 labResponse = res.body().get(0);
             } catch (IOException e) {
-                Log.e(LOGTAG, e.toString());
+                Log.d(LOGTAG, e.toString());
             }
 
             //Display data.
@@ -137,7 +137,7 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
 
         super.onProgressUpdate(params);
         LabResponse response = params[0];
-        Log.e(LOGTAG, "LoggerAsyncTask RUNNING");
+        Log.d(LOGTAG, "LoggerAsyncTask RUNNING");
 
         if (response == null) {
             showToast("Bad Internet connection");

@@ -77,6 +77,11 @@
             android:background="@color/colorPrimary"
             android:padding="10dp" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="@color/colorPrimaryDark"/>
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/iknowdaway"
             android:layout_width="match_parent"

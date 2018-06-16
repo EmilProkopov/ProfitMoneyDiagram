@@ -55,7 +55,7 @@ public class OrderBookGetter {
             res = responseCall.execute();
             bitfinexResponse = res.body();
         } catch (IOException e) {
-            Log.e(LOGTAG, "IO");
+            Log.d(LOGTAG, "IO");
         }
 
         return bitfinexResponse;
@@ -66,9 +66,9 @@ public class OrderBookGetter {
         BitfinexResponse response = getBitfinexResponse(limit, currencyPair);
 
         if(response != null) {
-            Log.e(LOGTAG, "Bitfinex OK");
+            Log.d(LOGTAG, "Bitfinex OK");
         } else {
-            Log.e(LOGTAG, "Bitfinex FAIL");
+            Log.d(LOGTAG, "Bitfinex FAIL");
             return new CompiledOrderBook();
         }
 
@@ -129,7 +129,7 @@ public class OrderBookGetter {
             res = responseCall.execute();
             cexResponse = res.body();
         } catch (IOException e) {
-            Log.e(LOGTAG, e.toString());
+            Log.d(LOGTAG, e.toString());
         }
 
         return cexResponse;
@@ -140,9 +140,9 @@ public class OrderBookGetter {
         CexResponse response = getCexPartResponse(limit, currencyPair);
 
         if(response != null) {
-            Log.e(LOGTAG, "Cex OK");
+            Log.d(LOGTAG, "Cex OK");
         } else {
-            Log.e(LOGTAG, "Cex FAIL");
+            Log.d(LOGTAG, "Cex FAIL");
             return new CompiledOrderBook();
         }
 
@@ -203,7 +203,7 @@ public class OrderBookGetter {
             res = responseCall.execute();
             exmoResponse = res.body();
         } catch (IOException e) {
-            Log.e(LOGTAG, "IO");
+            Log.d(LOGTAG, "IO");
         }
 
         return exmoResponse;
@@ -215,9 +215,9 @@ public class OrderBookGetter {
         response = getExmoResponseBTCUSTD(limit, currencyPair);
 
         if(response != null) {
-            Log.e(LOGTAG, "Exmo OK");
+            Log.d(LOGTAG, "Exmo OK");
         } else {
-            Log.e(LOGTAG, "Exmo FAIL");
+            Log.d(LOGTAG, "Exmo FAIL");
             return new CompiledOrderBook();
         }
 
@@ -305,7 +305,7 @@ public class OrderBookGetter {
             res = responseCall.execute();
             gdaxResponse = res.body();
         } catch (IOException e) {
-            Log.e(LOGTAG, "IO");
+            Log.d(LOGTAG, "IO");
         }
 
         return gdaxResponse;
@@ -317,9 +317,9 @@ public class OrderBookGetter {
         responce = getGdaxResponseTop50(currencyPair);
 
         if(responce != null) {
-            Log.e(LOGTAG, "Gdax OK");
+            Log.d(LOGTAG, "Gdax OK");
         } else {
-            Log.e(LOGTAG, "Gdax FAIL");
+            Log.d(LOGTAG, "Gdax FAIL");
             return new CompiledOrderBook();
         }
 
@@ -392,9 +392,9 @@ public class OrderBookGetter {
         response = getKucoinResponseBTCUSTD(limit, currencyPair);
 
         if(response != null) {
-            Log.e(LOGTAG, "Kucoin OK");
+            Log.d(LOGTAG, "Kucoin OK");
         } else {
-            Log.e(LOGTAG, "Kucoin FAIL");
+            Log.d(LOGTAG, "Kucoin FAIL");
             return new CompiledOrderBook();
         }
 

@@ -66,7 +66,7 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
         try {
             updateRateSeconds = Integer.parseInt(sp.getString("update_rate", "10"));
         } catch (java.lang.RuntimeException e) {
-            Log.e(LOGTAG, "Wrong formated string: update rate");
+            Log.d(LOGTAG, "Wrong formated string: update rate");
             updateRateSeconds = 10;
         }
     }
@@ -207,7 +207,7 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
 
         super.onProgressUpdate(params);
         OutputDataSet dataSet = params[0];
-        Log.e(LOGTAG, "SoloAsyncTask RUNNING");
+        Log.d(LOGTAG, "SoloAsyncTask RUNNING");
 
         if (dataSet.getDeals().size() <= 1) {
             showToast("No profit can be made.\nCheck Internet connection\nand number of active markets.");
@@ -271,4 +271,5 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
         list.setLayoutManager(llm);
         list.setAdapter(new DealListAdapter(dldata));
     }
+
 }

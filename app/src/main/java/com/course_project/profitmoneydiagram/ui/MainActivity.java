@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences sp;
     LoggerAsyncTask loggerAsyncTask;
     SoloAsyncTask soloAsyncTask;
+    FloatingActionButton fab;
     Boolean paused;
 
     //onClick for settings button.
@@ -32,32 +33,42 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClick2 (View v) {
-        FloatingActionButton fab = (FloatingActionButton) v;
-        Drawable d = fab.getDrawable();
+
         paused = !paused;
         if (paused) {
-            Log.e("MainActivity", "Paused");
+            Log.d("MainActivity", "Paused");
             if (loggerAsyncTask != null) {
-                Log.e("MainActivity", "loggerAsyncTask cancelling");
+                Log.d("MainActivity", "loggerAsyncTask cancelling");
 
                 loggerAsyncTask.cancel(true);
             }
             if (soloAsyncTask != null) {
-                Log.e("MainActivity", "soloAsyncTask cancelled");
+                Log.d("MainActivity", "soloAsyncTask cancelled");
 
                 soloAsyncTask.cancel(true);
             }
         } else {
-            Log.e("MainActivity", "Played");
+            Log.d("MainActivity", "Played");
 
             if(sp.getBoolean("extract_data_directly", false)) {
+                Log.d("MainActivity", "soloAsyncTask starting");
                 startSoloAsyncTask();
             } else {
+                Log.d("MainActivity", "loggerAsyncTask starting");
                 startLoggerAsyncTask();
             }
         }
+        updateFAB();
 
-        d.setLevel(d.getLevel() == 0 ? 1 : 0 );
+    }
+
+    private void updateFAB () {
+        Drawable d = fab.getDrawable();
+        if (!paused) {
+            d.setLevel(0);
+        } else {
+            d.setLevel(1);
+        }
     }
 
     public void startLoggerAsyncTask () {
@@ -75,6 +86,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+        Log.d("MainActivity", "ON_CREATE");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -85,35 +98,22 @@ public class MainActivity extends AppCompatActivity {
         LineChart chart = findViewById(R.id.diagram);
         chart.setNoDataText("Please wait. Data receiving may take up to 10 seconds");
 
+        fab = findViewById(R.id.fab);
+
         sp = PreferenceManager.getDefaultSharedPreferences(this);
-
-        /*sp.registerOnSharedPreferenceChangeListener(
-                new SharedPreferences.OnSharedPreferenceChangeListener() {
-                    @Override
-                    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
-                                                          String key) {
-                        if (key.equals("extract_data_directly")) {
-
-                            if (sharedPreferences.getBoolean(key, false)) {
-                                startSoloAsyncTask();
-                            } else {
-                                startLoggerAsyncTask();
-                            }
-                        }
-                    }
-                }
-        );*/
 
         if(sp.getBoolean("extract_data_directly", false)) {
             startSoloAsyncTask();
         } else {
             startLoggerAsyncTask();
         }
+
+        updateFAB();
     }
 
     @Override
     protected void onStop () {
-
+        Log.d("MainActivity", "ON_STOP");
         super.onStop();
         if (loggerAsyncTask != null) {
             loggerAsyncTask.cancel(true);
@@ -128,6 +128,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onRestart () {
         //Cancel previous AsyncTask and start new.
         super.onRestart();
+        Log.d("MainActivity", "ON_RESTART");
+
+        paused = false;
         if (loggerAsyncTask != null) {
             loggerAsyncTask.cancel(true);
         }
@@ -141,6 +144,8 @@ public class MainActivity extends AppCompatActivity {
         } else {
             startLoggerAsyncTask();
         }
+
+        updateFAB();
     }
 
 }
