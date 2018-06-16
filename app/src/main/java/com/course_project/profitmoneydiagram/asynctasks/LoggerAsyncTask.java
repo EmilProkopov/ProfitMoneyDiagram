@@ -121,14 +121,6 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
             //Display data.
             publishProgress(labResponse);
 
-            //Stop executing if user has changed settings and data should be updated
-            // without using logger.
-            if (sp.getBoolean("extract_data_directly", false)) {
-                Log.d(LOGTAG, "CANCELLED");
-                cancel(true);
-                activityReference.get().startSoloAsyncTask();
-            }
-
             //Wait before next data updating.
             try {
                 TimeUnit.SECONDS.sleep(updateRateSeconds);
@@ -172,7 +164,7 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
         Float optimalProfit = response.getOptimalPoint().getProfit().floatValue();
 
         List<Entry> optimalChartEntries = new ArrayList<>();
-        optimalChartEntries.add(new Entry(optimalAmount,optimalProfit));
+        optimalChartEntries.add(new Entry(optimalAmount, optimalProfit));
         LineDataSet ds2 = new LineDataSet(optimalChartEntries, "");
 
         ds2.setColor(R.color.colorPrimaryDark);
@@ -191,10 +183,10 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
 
         //Display optimal profit.
         ((TextView) activityReference.get().findViewById(R.id.profit_string))
-                .setText("Profit: "+(Math.round(optimalProfit * 100) / 100.0)+ " " +secondCurrency);
+                .setText("Profit: " + (Math.round(optimalProfit * 100) / 100.0) + " " + secondCurrency);
         //Display optimal amount.
         ((TextView) activityReference.get().findViewById(R.id.amount_string))
-                .setText("Amount: "+(Math.round(optimalAmount * 100) / 100.0)+ " " +secondCurrency);
+                .setText("Amount: " + (Math.round(optimalAmount * 100) / 100.0) + " " + secondCurrency);
         //Display current currency pair.
         ((TextView) activityReference.get().findViewById(R.id.currency_pair)).setText(currencyPair);
 

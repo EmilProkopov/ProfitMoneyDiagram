@@ -29,7 +29,7 @@ public class DealListAdapter extends RecyclerView.Adapter <DealListAdapter.DealV
     @Override
     public DealViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-        TextView tv = (TextView) LayoutInflater.from(parent.getContext())
+        View tv = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_item, parent, false);
 
         return new DealViewHolder(tv);
@@ -61,7 +61,7 @@ public class DealListAdapter extends RecyclerView.Adapter <DealListAdapter.DealV
 
         public DealViewHolder(View itemView) {
             super(itemView);
-            dealTextView = (TextView) itemView;
+            dealTextView = itemView.findViewById(R.id.temp);
         }
     }
 

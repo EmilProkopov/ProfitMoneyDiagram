@@ -56,7 +56,7 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
                 Toast.LENGTH_LONG);
         toast.setGravity(Gravity.CENTER, 0, 0);
         TextView v = (TextView) toast.getView().findViewById(android.R.id.message);
-        if( v != null) v.setGravity(Gravity.CENTER);
+        if (v != null) v.setGravity(Gravity.CENTER);
         toast.show();
     }
 
@@ -98,8 +98,8 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
             String currencyPair = sp.getString("currency_pares", "BTC/USD");
             //Get orderBook with top orders from all markets.
             CompiledOrderBook orderBook = getter.getCompiledOrderBook(limit,
-                                                                        activityReference,
-                                                                        currencyPair);
+                    activityReference,
+                    currencyPair);
 
             Double profit = 0.0; //Profit that we can get.
             Double amount = 0.0; //Amount of money necessary to do it.
@@ -165,8 +165,7 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
                 //Check if we have achieved the optimal point.
                 if (num.equals(2)) {
                     firstK = (profit - prevProfit) / (amount - prevAmount);
-                }
-                else if (num > 1) {
+                } else if (num > 1) {
                     curK = (profit - prevProfit) / (amount - prevAmount);
                     if (curK / firstK >= alpha) {
                         optimalAmount = amount;
@@ -192,13 +191,6 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
             //Display data.
             publishProgress(outputDataSet);
 
-            //Stop executing if user has changed settings and data should be updated using logger.
-            if (!sp.getBoolean("extract_data_directly", true)) {
-                Log.d(LOGTAG, "SOLO_CANCELLED");
-                cancel(true);
-                activityReference.get().startLoggerAsyncTask();
-            }
-
             //Wait before next data updating.
             try {
                 TimeUnit.SECONDS.sleep(updateRateSeconds);
@@ -211,7 +203,7 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
 
 
     @Override
-    protected void onProgressUpdate(OutputDataSet ... params) {
+    protected void onProgressUpdate(OutputDataSet... params) {
 
         super.onProgressUpdate(params);
         OutputDataSet dataSet = params[0];
@@ -243,7 +235,7 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
         Float optimalProfit = dataSet.getOptimalProfit().floatValue();
 
         List<Entry> optimalChartEntries = new ArrayList<>();
-        optimalChartEntries.add(new Entry(optimalAmount,optimalProfit));
+        optimalChartEntries.add(new Entry(optimalAmount, optimalProfit));
         LineDataSet ds2 = new LineDataSet(optimalChartEntries, "");
 
         ds2.setColor(R.color.colorPrimaryDark);
@@ -262,10 +254,10 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
 
         //Display optimal profit.
         ((TextView) activityReference.get().findViewById(R.id.profit_string))
-                .setText("Profit: "+(Math.round(optimalProfit * 100) / 100.0) +" "+ secondCurrency);
+                .setText("Profit: " + (Math.round(optimalProfit * 100) / 100.0) + " " + secondCurrency);
         //Display optimal amount.
         ((TextView) activityReference.get().findViewById(R.id.amount_string))
-                .setText("Amount: "+(Math.round(optimalAmount * 100) / 100.0) +" "+ secondCurrency);
+                .setText("Amount: " + (Math.round(optimalAmount * 100) / 100.0) + " " + secondCurrency);
         //Display current currency pair.
         ((TextView) activityReference.get().findViewById(R.id.currency_pair)).setText(currencyPair);
 
