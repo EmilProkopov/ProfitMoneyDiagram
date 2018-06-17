@@ -3,15 +3,13 @@ package com.course_project.profitmoneydiagram.ui;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
-import android.widget.Toast;
+import android.widget.ProgressBar;
 
 import com.course_project.profitmoneydiagram.R;
 import com.course_project.profitmoneydiagram.asynctasks.LoggerAsyncTask;
@@ -24,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
     LoggerAsyncTask loggerAsyncTask;
     SoloAsyncTask soloAsyncTask;
     FloatingActionButton fab;
+    ProgressBar pb;
     Boolean paused;
 
     //onClick for settings button.
@@ -58,16 +57,18 @@ public class MainActivity extends AppCompatActivity {
                 startLoggerAsyncTask();
             }
         }
-        updateFAB();
+        updateFABandProgressBar();
 
     }
 
-    private void updateFAB () {
+    private void updateFABandProgressBar() {
         Drawable d = fab.getDrawable();
         if (!paused) {
             d.setLevel(0);
+            pb.setVisibility(ProgressBar.VISIBLE);
         } else {
             d.setLevel(1);
+            pb.setVisibility(ProgressBar.INVISIBLE);
         }
     }
 
@@ -99,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
         chart.setNoDataText("Please wait. Data receiving may take up to 10 seconds");
 
         fab = findViewById(R.id.fab);
+        pb = findViewById(R.id.progress_bar);
 
         sp = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -108,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
             startLoggerAsyncTask();
         }
 
-        updateFAB();
+        updateFABandProgressBar();
     }
 
     @Override
@@ -145,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
             startLoggerAsyncTask();
         }
 
-        updateFAB();
+        updateFABandProgressBar();
     }
 
 }
