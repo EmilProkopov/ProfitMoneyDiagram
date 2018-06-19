@@ -7,6 +7,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Gravity;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,12 +33,16 @@ import java.util.concurrent.TimeUnit;
 public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet> {
 
     private static final String LOGTAG = "SoloAsyncTask";
+    private static final int TIMEFORREQUEST = 5;
     private static int updateRateSeconds = 10;
 
     private WeakReference<MainActivity> activityReference;
     private SharedPreferences sp;
     private String currencyPair;
     private String secondCurrency; //Second currency in the pair.
+
+    private boolean newDataReadyToPublish = true;
+    private int progress = 0; //step of progress bar updating
 
     public SoloAsyncTask(MainActivity activity) {
 
@@ -192,11 +197,25 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
             publishProgress(outputDataSet);
 
             //Wait before next data updating.
-            try {
-                TimeUnit.SECONDS.sleep(updateRateSeconds);
-            } catch (InterruptedException e) {
-                Log.d(LOGTAG, e.getMessage());
+            newDataReadyToPublish = false;
+
+            progress = 0;
+            publishProgress(outputDataSet); //drop the progress bar to zero.
+
+
+            for (int i = 1; i <= updateRateSeconds + 1; ++i) {
+
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                    Log.e(LOGTAG, e.getMessage());
+                }
+
+                progress = Math.round(100*i/updateRateSeconds);
+
+                publishProgress(outputDataSet);
             }
+            newDataReadyToPublish = true;
         }
         return null;
     }
@@ -209,67 +228,76 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
         OutputDataSet dataSet = params[0];
         Log.d(LOGTAG, "SoloAsyncTask RUNNING");
 
-        if (dataSet.getDeals().size() <= 1) {
-            showToast("No profit can be made.\nCheck Internet connection\nand number of active markets.");
-            return;
+        if (!newDataReadyToPublish) {
+
+            Log.e(LOGTAG, "Updating progress bar: " + progress);
+            ProgressBar pb = activityReference.get().findViewById(R.id.progress_bar);
+            pb.setProgress(progress);
+        } else {
+
+            Log.e(LOGTAG, "Publishing progress");
+            if (dataSet.getDeals().size() <= 1) {
+                showToast("No profit can be made.\nCheck Internet connection\nand number of active markets.");
+                return;
+            }
+
+            //Display profit points on the diagram.
+            LineChart chart = (LineChart) activityReference.get().findViewById(R.id.diagram);
+            //Points of the plot.
+            List<Entry> chartEntries = new ArrayList<>();
+            //Fill the list of points.
+            for (int i = 0; i < dataSet.getAmountPoints().size(); ++i) {
+
+                chartEntries.add(new Entry(dataSet.getAmountPoints().get(i).floatValue()
+                        , dataSet.getProfitPoints().get(i).floatValue()));
+            }
+            //Make a DataSet with ordinary points.
+            LineDataSet ds = new LineDataSet(chartEntries, "Profit/Money Diagram");
+            ds.setColor(R.color.colorPrimaryDark);
+            ds.setCircleColors(activityReference.get()
+                    .getResources().getColor(R.color.diagramCircleOrdinary));
+
+            //Make a DataSet with optimal point.
+            Float optimalAmount = dataSet.getOptimalAmount().floatValue();
+            Float optimalProfit = dataSet.getOptimalProfit().floatValue();
+
+            List<Entry> optimalChartEntries = new ArrayList<>();
+            optimalChartEntries.add(new Entry(optimalAmount, optimalProfit));
+            LineDataSet ds2 = new LineDataSet(optimalChartEntries, "");
+
+            ds2.setColor(R.color.colorPrimaryDark);
+            ds2.setCircleColors(activityReference.get()
+                    .getResources().getColor(R.color.diagramCircleOptimal));
+
+            LineDataSet[] lineDataSets = new LineDataSet[2];
+            lineDataSets[0] = ds;
+            lineDataSets[1] = ds2;
+            LineData ld = new LineData(lineDataSets);
+
+            chart.setData(ld);
+            chart.getDescription().setText("Horizontal: amount; Vertical: profit");
+            chart.getLegend().setEnabled(false);
+            chart.invalidate();
+
+            //Display optimal profit.
+            ((TextView) activityReference.get().findViewById(R.id.profit_string))
+                    .setText("Profit: " + (Math.round(optimalProfit * 100) / 100.0) + " " + secondCurrency);
+            //Display optimal amount.
+            ((TextView) activityReference.get().findViewById(R.id.amount_string))
+                    .setText("Amount: " + (Math.round(optimalAmount * 100) / 100.0) + " " + secondCurrency);
+            //Display current currency pair.
+            ((TextView) activityReference.get().findViewById(R.id.currency_pair)).setText(currencyPair);
+
+            //Prepare data about deals for displaying.
+            DealListData dldata = new DealListData(dataSet);
+            //Display it.
+            RecyclerView list = activityReference.get().findViewById(R.id.iknowdaway);
+            LinearLayoutManager llm = new LinearLayoutManager(activityReference.get());
+
+            llm.setOrientation(LinearLayoutManager.VERTICAL);
+            list.setLayoutManager(llm);
+            list.setAdapter(new DealListAdapter(dldata));
         }
-
-        //Display profit points on the diagram.
-        LineChart chart = (LineChart) activityReference.get().findViewById(R.id.diagram);
-        //Points of the plot.
-        List<Entry> chartEntries = new ArrayList<>();
-        //Fill the list of points.
-        for (int i = 0; i < dataSet.getAmountPoints().size(); ++i) {
-
-            chartEntries.add(new Entry(dataSet.getAmountPoints().get(i).floatValue()
-                    , dataSet.getProfitPoints().get(i).floatValue()));
-        }
-        //Make a DataSet with ordinary points.
-        LineDataSet ds = new LineDataSet(chartEntries, "Profit/Money Diagram");
-        ds.setColor(R.color.colorPrimaryDark);
-        ds.setCircleColors(activityReference.get()
-                .getResources().getColor(R.color.diagramCircleOrdinary));
-
-        //Make a DataSet with optimal point.
-        Float optimalAmount = dataSet.getOptimalAmount().floatValue();
-        Float optimalProfit = dataSet.getOptimalProfit().floatValue();
-
-        List<Entry> optimalChartEntries = new ArrayList<>();
-        optimalChartEntries.add(new Entry(optimalAmount, optimalProfit));
-        LineDataSet ds2 = new LineDataSet(optimalChartEntries, "");
-
-        ds2.setColor(R.color.colorPrimaryDark);
-        ds2.setCircleColors(activityReference.get()
-                .getResources().getColor(R.color.diagramCircleOptimal));
-
-        LineDataSet[] lineDataSets = new LineDataSet[2];
-        lineDataSets[0] = ds;
-        lineDataSets[1] = ds2;
-        LineData ld = new LineData(lineDataSets);
-
-        chart.setData(ld);
-        chart.getDescription().setText("Horizontal: amount; Vertical: profit");
-        chart.getLegend().setEnabled(false);
-        chart.invalidate();
-
-        //Display optimal profit.
-        ((TextView) activityReference.get().findViewById(R.id.profit_string))
-                .setText("Profit: " + (Math.round(optimalProfit * 100) / 100.0) + " " + secondCurrency);
-        //Display optimal amount.
-        ((TextView) activityReference.get().findViewById(R.id.amount_string))
-                .setText("Amount: " + (Math.round(optimalAmount * 100) / 100.0) + " " + secondCurrency);
-        //Display current currency pair.
-        ((TextView) activityReference.get().findViewById(R.id.currency_pair)).setText(currencyPair);
-
-        //Prepare data about deals for displaying.
-        DealListData dldata = new DealListData(dataSet);
-        //Display it.
-        RecyclerView list = activityReference.get().findViewById(R.id.iknowdaway);
-        LinearLayoutManager llm = new LinearLayoutManager(activityReference.get());
-
-        llm.setOrientation(LinearLayoutManager.VERTICAL);
-        list.setLayoutManager(llm);
-        list.setAdapter(new DealListAdapter(dldata));
     }
 
 }

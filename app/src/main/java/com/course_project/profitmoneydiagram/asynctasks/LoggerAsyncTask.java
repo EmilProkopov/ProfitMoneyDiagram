@@ -7,6 +7,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Gravity;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,6 +37,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
 
     private static final String LOGTAG = "LoggerAsyncTask";
+    private static final int TIMEFORREQUEST = 5;
     private static int updateRateSeconds = 10;
 
     private WeakReference<MainActivity> activityReference;
@@ -43,13 +45,16 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
     private String currencyPair;
     private String secondCurrency; //Second currency in the pair.
 
+    private boolean newDataReadyToPublish = true;
+    private int progress = 0; //step of progress bar updating
+
     public LoggerAsyncTask(MainActivity activity) {
 
         this.activityReference = new WeakReference<>(activity);
 
         sp = PreferenceManager.getDefaultSharedPreferences(activityReference.get());
 
-        Log.d(LOGTAG, "Logger ASYNCTASK STARTED");
+        Log.e(LOGTAG, "Logger ASYNCTASK STARTED");
     }
 
     //Show a text message on the screan.
@@ -67,8 +72,11 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
         try {
             updateRateSeconds = Integer.parseInt(sp.getString("update_rate", "10"));
         } catch (java.lang.RuntimeException e) {
-            Log.d(LOGTAG, "Wrong formatted string: update rate");
+            Log.e(LOGTAG, "Wrong formatted string: update rate");
             updateRateSeconds = 10;
+        }
+        if (updateRateSeconds < 1) {
+            updateRateSeconds = 1;
         }
     }
 
@@ -115,18 +123,32 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
                 res = responseCall.execute();
                 labResponse = res.body().get(0);
             } catch (IOException e) {
-                Log.d(LOGTAG, e.toString());
+                Log.e(LOGTAG, e.toString());
             }
 
             //Display data.
             publishProgress(labResponse);
 
             //Wait before next data updating.
-            try {
-                TimeUnit.SECONDS.sleep(updateRateSeconds);
-            } catch (InterruptedException e) {
-                Log.d(LOGTAG, e.getMessage());
+            newDataReadyToPublish = false;
+
+            progress = 0;
+            publishProgress(labResponse); //drop the progress bar to zero.
+
+
+            for (int i = 1; i <= updateRateSeconds + 1; ++i) {
+
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                    Log.e(LOGTAG, e.getMessage());
+                }
+
+                progress = Math.round(100*i/updateRateSeconds);
+
+                publishProgress(labResponse);
             }
+            newDataReadyToPublish = true;
         }
         return labResponse;
     }
@@ -137,69 +159,77 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
 
         super.onProgressUpdate(params);
         LabResponse response = params[0];
-        Log.d(LOGTAG, "LoggerAsyncTask RUNNING");
+        Log.e(LOGTAG, "LoggerAsyncTask RUNNING");
 
-        if (response == null) {
-            showToast("Bad Internet connection");
-            return;
+        if (!newDataReadyToPublish) {
+
+            Log.e(LOGTAG, "Updating progress bar: " + progress);
+            ProgressBar pb = activityReference.get().findViewById(R.id.progress_bar);
+            pb.setProgress(progress);
+        } else {
+
+            Log.e(LOGTAG, "Publishing progress");
+            if (response == null) {
+                showToast("Bad Internet connection");
+                return;
+            }
+
+            //Display profit points on the diagram.
+            LineChart chart = (LineChart) activityReference.get().findViewById(R.id.diagram);
+            //List of points of the chart.
+            List<Entry> chartEntries = new ArrayList<>();
+            //Put all points in the list.
+            for (int i = 0; i < response.getAmountPoints().size(); ++i) {
+                chartEntries.add(new Entry(response.getAmountPoints().get(i).floatValue()
+                        , response.getProfitPoints().get(i).floatValue()));
+            }
+            //Make a DataSet with ordinary points.
+            LineDataSet ds = new LineDataSet(chartEntries, "Profit/Money Diagram");
+            ds.setColor(R.color.colorPrimaryDark);
+            ds.setCircleColors(activityReference.get()
+                    .getResources().getColor(R.color.diagramCircleOrdinary));
+
+            //Make DataSet with optimal point.
+            Float optimalAmount = response.getOptimalPoint().getAmount().floatValue();
+            Float optimalProfit = response.getOptimalPoint().getProfit().floatValue();
+
+            List<Entry> optimalChartEntries = new ArrayList<>();
+            optimalChartEntries.add(new Entry(optimalAmount, optimalProfit));
+            LineDataSet ds2 = new LineDataSet(optimalChartEntries, "");
+
+            ds2.setColor(R.color.colorPrimaryDark);
+            ds2.setCircleColors(activityReference.get()
+                    .getResources().getColor(R.color.diagramCircleOptimal));
+
+            LineDataSet[] lineDataSets = new LineDataSet[2];
+            lineDataSets[0] = ds;
+            lineDataSets[1] = ds2;
+            LineData ld = new LineData(lineDataSets);
+
+            chart.setData(ld);
+            chart.getDescription().setText("Horizontal: amount; Vertical: profit");
+            chart.getLegend().setEnabled(false);
+            chart.invalidate();
+
+            //Display optimal profit.
+            ((TextView) activityReference.get().findViewById(R.id.profit_string))
+                    .setText("Profit: " + (Math.round(optimalProfit * 100) / 100.0) + " " + secondCurrency);
+            //Display optimal amount.
+            ((TextView) activityReference.get().findViewById(R.id.amount_string))
+                    .setText("Amount: " + (Math.round(optimalAmount * 100) / 100.0) + " " + secondCurrency);
+            //Display current currency pair.
+            ((TextView) activityReference.get().findViewById(R.id.currency_pair)).setText(currencyPair);
+
+            //Prepare data about deals for displaying.
+            DealListData dldata = new DealListData(response.getOrders());
+            //Display it.
+            RecyclerView list = activityReference.get().findViewById(R.id.iknowdaway);
+            LinearLayoutManager llm = new LinearLayoutManager(activityReference.get());
+
+            llm.setOrientation(LinearLayoutManager.VERTICAL);
+            list.setLayoutManager(llm);
+            list.setAdapter(new DealListAdapter(dldata));
         }
-
-        //Display profit points on the diagram.
-        LineChart chart = (LineChart) activityReference.get().findViewById(R.id.diagram);
-        //List of points of the chart.
-        List<Entry> chartEntries = new ArrayList<>();
-        //Put all points in the list.
-        for (int i = 0; i < response.getAmountPoints().size(); ++i) {
-            chartEntries.add(new Entry(response.getAmountPoints().get(i).floatValue()
-                    , response.getProfitPoints().get(i).floatValue()));
-        }
-        //Make a DataSet with ordinary points.
-        LineDataSet ds = new LineDataSet(chartEntries, "Profit/Money Diagram");
-        ds.setColor(R.color.colorPrimaryDark);
-        ds.setCircleColors(activityReference.get()
-                .getResources().getColor(R.color.diagramCircleOrdinary));
-
-        //Make DataSet with optimal point.
-        Float optimalAmount = response.getOptimalPoint().getAmount().floatValue();
-        Float optimalProfit = response.getOptimalPoint().getProfit().floatValue();
-
-        List<Entry> optimalChartEntries = new ArrayList<>();
-        optimalChartEntries.add(new Entry(optimalAmount, optimalProfit));
-        LineDataSet ds2 = new LineDataSet(optimalChartEntries, "");
-
-        ds2.setColor(R.color.colorPrimaryDark);
-        ds2.setCircleColors(activityReference.get()
-                .getResources().getColor(R.color.diagramCircleOptimal));
-
-        LineDataSet[] lineDataSets = new LineDataSet[2];
-        lineDataSets[0] = ds;
-        lineDataSets[1] = ds2;
-        LineData ld = new LineData(lineDataSets);
-
-        chart.setData(ld);
-        chart.getDescription().setText("Horizontal: amount; Vertical: profit");
-        chart.getLegend().setEnabled(false);
-        chart.invalidate();
-
-        //Display optimal profit.
-        ((TextView) activityReference.get().findViewById(R.id.profit_string))
-                .setText("Profit: " + (Math.round(optimalProfit * 100) / 100.0) + " " + secondCurrency);
-        //Display optimal amount.
-        ((TextView) activityReference.get().findViewById(R.id.amount_string))
-                .setText("Amount: " + (Math.round(optimalAmount * 100) / 100.0) + " " + secondCurrency);
-        //Display current currency pair.
-        ((TextView) activityReference.get().findViewById(R.id.currency_pair)).setText(currencyPair);
-
-        //Prepare data about deals for displaying.
-        DealListData dldata = new DealListData(response.getOrders());
-        //Display it.
-        RecyclerView list = activityReference.get().findViewById(R.id.iknowdaway);
-        LinearLayoutManager llm = new LinearLayoutManager(activityReference.get());
-
-        llm.setOrientation(LinearLayoutManager.VERTICAL);
-        list.setLayoutManager(llm);
-        list.setAdapter(new DealListAdapter(dldata));
-
     }
 
 }

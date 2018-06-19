@@ -65,11 +65,10 @@ public class MainActivity extends AppCompatActivity {
         Drawable d = fab.getDrawable();
         if (!paused) {
             d.setLevel(0);
-            pb.setVisibility(ProgressBar.VISIBLE);
         } else {
             d.setLevel(1);
-            pb.setVisibility(ProgressBar.INVISIBLE);
         }
+        pb.setProgress(0);
     }
 
     public void startLoggerAsyncTask () {
