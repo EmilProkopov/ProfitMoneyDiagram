@@ -136,15 +136,15 @@ public class LoggerAsyncTask extends AsyncTask<Void, LabResponse, LabResponse> {
             publishProgress(labResponse); //drop the progress bar to zero.
 
 
-            for (int i = 1; i <= updateRateSeconds + 1; ++i) {
+            for (double i = 0.1; i <= (updateRateSeconds + 0.1); i+=0.1) {
 
                 try {
-                    TimeUnit.SECONDS.sleep(1);
+                    TimeUnit.MILLISECONDS.sleep(100);
                 } catch (InterruptedException e) {
                     Log.e(LOGTAG, e.getMessage());
                 }
 
-                progress = Math.round(100*i/updateRateSeconds);
+                progress = (int)Math.round(100*i/updateRateSeconds);
 
                 publishProgress(labResponse);
             }
