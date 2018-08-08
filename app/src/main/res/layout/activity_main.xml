@@ -122,4 +122,12 @@
         android:background="@color/colorPrimaryDark"
         android:textColor="@color/colorPrimary"/>
 
+    <ProgressBar
+        android:id="@+id/big_round_progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:layout_margin="120dp"/>
+
 </FrameLayout>

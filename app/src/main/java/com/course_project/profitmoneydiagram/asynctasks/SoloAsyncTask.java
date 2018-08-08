@@ -7,6 +7,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -218,7 +219,7 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
     }
 
 
-    private void updateUIData(OutputDataSet dataSet) {
+    private void updateChart(OutputDataSet dataSet) {
 
         //Display profit points on the diagram.
         LineChart chart = activityReference.get().findViewById(R.id.diagram);
@@ -258,6 +259,16 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
         chart.getLegend().setEnabled(false);
         chart.invalidate();
 
+    }
+
+
+    private void updateUIData(OutputDataSet dataSet) {
+
+        updateChart(dataSet);
+
+        Float optimalAmount = dataSet.getOptimalAmount().floatValue();
+        Float optimalProfit = dataSet.getOptimalProfit().floatValue();
+
         //Display optimal profit.
         ((TextView) activityReference.get().findViewById(R.id.profit_string))
                 .setText(activityReference.get().getString(R.string.profit_string,
@@ -288,6 +299,9 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
         ((TextView) activityReference.get().findViewById(R.id.time_line))
                 .setText(activityReference.get().getString(R.string.date_time_string,
                         format.format(currentTime)));
+
+        //Hide big round progress bar
+        activityReference.get().findViewById(R.id.big_round_progress_bar).setVisibility(View.GONE);
     }
 
 
