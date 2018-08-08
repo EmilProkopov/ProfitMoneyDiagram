@@ -78,4 +78,5 @@
     <string name="Main_toolbar_button_description">Settings</string>
     <string name="profit_string">Profit: %1$s %2$s</string>
     <string name="amount_string">Amount: %1$s %2$s</string>
+    <string name="back_arrow_settings">Back</string>
 </resources>

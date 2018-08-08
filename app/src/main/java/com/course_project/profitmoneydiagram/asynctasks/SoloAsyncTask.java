@@ -26,8 +26,11 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 
 import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 //Creates new thread, gets data from markets and displays it.
@@ -295,6 +298,12 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         list.setLayoutManager(llm);
         list.setAdapter(new DealListAdapter(dldata));
+
+        //Display time
+        long currentTime = Calendar.getInstance().getTimeInMillis();
+        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:MM:ss", Locale.US);
+        ((TextView)activityReference.get().findViewById(R.id.time_line))
+                .setText(format.format(currentTime));
     }
 
 

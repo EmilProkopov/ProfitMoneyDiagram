@@ -33,7 +33,7 @@
             <ImageButton
                 android:background="@color/colorPrimaryDark"
                 android:onClick="onClick3"
-                android:contentDescription="Back"
+                android:contentDescription="@string/back_arrow_settings"
                 android:id="@+id/back_btn"
                 android:layout_gravity="start"
                 android:layout_height="48dp"
