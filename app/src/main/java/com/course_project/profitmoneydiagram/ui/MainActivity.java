@@ -2,6 +2,7 @@ package com.course_project.profitmoneydiagram.ui;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,9 +12,11 @@ import android.widget.ProgressBar;
 
 import com.course_project.profitmoneydiagram.R;
 import com.course_project.profitmoneydiagram.asynctasks.SoloAsyncTask;
+import com.course_project.profitmoneydiagram.model.OrderBookGetter;
 import com.github.mikephil.charting.charts.LineChart;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements OrderBookGetter.OrderBookGetterProgressListener {
 
     SoloAsyncTask soloAsyncTask;
     FloatingActionButton fab;
@@ -110,4 +113,12 @@ public class MainActivity extends AppCompatActivity {
         updateFABandProgressBar();
     }
 
+    @Override
+    public void updateOrderBookGetterProgress(Integer progress) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            pb.setProgress(progress, true);
+        } else {
+            pb.setProgress(progress);
+        }
+    }
 }

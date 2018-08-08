@@ -2,13 +2,11 @@ package com.course_project.profitmoneydiagram.asynctasks;
 
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Gravity;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,8 +42,7 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
     private String currencyPair;
     private String secondCurrency; //Second currency in the pair.
 
-    private boolean newDataReadyToPublish = true;
-    private int progress = 0; //step of progress bar updating
+    private OrderBookGetter orderBookGetter;
 
 
     public SoloAsyncTask(MainActivity activity) {
@@ -53,6 +50,8 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
         this.activityReference = new WeakReference<>(activity);
 
         sp = PreferenceManager.getDefaultSharedPreferences(activityReference.get());
+
+        orderBookGetter = new OrderBookGetter(activity);
 
         Log.d(LOGTAG, "SOLO ASYNCTASK STARTED");
     }
@@ -183,11 +182,8 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
     }
 
 
-
     @Override
     protected OutputDataSet doInBackground(Void... params) {
-
-        OrderBookGetter getter = new OrderBookGetter();
 
         while (!isCancelled()) {
 
@@ -201,7 +197,7 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
             //Currency pair to trade.
             String currencyPair = sp.getString("currency_pares", "BTC/USD");
             //Get orderBook with top orders from all markets.
-            CompiledOrderBook orderBook = getter.getCompiledOrderBook(limit,
+            CompiledOrderBook orderBook = orderBookGetter.getCompiledOrderBook(limit,
                     activityReference,
                     currencyPair);
 
@@ -211,25 +207,12 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
             publishProgress(outputDataSet);
 
             //Wait before next data updating.
-            newDataReadyToPublish = false;
 
-            progress = 0;
-            publishProgress(outputDataSet); //drop the progress bar to zero.
-
-
-            for (double i = 0.1; i <= (updateRateSeconds + 0.1); i+=0.1) {
-
-                try {
-                    TimeUnit.MILLISECONDS.sleep(100);
-                } catch (InterruptedException e) {
-                    Log.e(LOGTAG, e.getMessage());
-                }
-
-                progress = (int)Math.round(100*i/updateRateSeconds);
-
-                publishProgress(outputDataSet);
+            try {
+                TimeUnit.SECONDS.sleep(updateRateSeconds);
+            } catch (InterruptedException e) {
+                Log.e(LOGTAG, e.getMessage());
             }
-            newDataReadyToPublish = true;
         }
         return null;
     }
@@ -285,7 +268,7 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
                 .setText(activityReference.get().getString(R.string.amount_string,
                         String.valueOf(Math.round(optimalAmount * 100) / 100.0),
                         secondCurrency));
-        
+
         //Display current currency pair.
         ((TextView) activityReference.get().findViewById(R.id.currency_pair)).setText(currencyPair);
 
@@ -302,7 +285,7 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
         //Display time
         long currentTime = Calendar.getInstance().getTimeInMillis();
         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:MM:ss", Locale.US);
-        ((TextView)activityReference.get().findViewById(R.id.time_line))
+        ((TextView) activityReference.get().findViewById(R.id.time_line))
                 .setText(activityReference.get().getString(R.string.date_time_string,
                         format.format(currentTime)));
     }
@@ -313,27 +296,16 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
 
         super.onProgressUpdate(params);
         OutputDataSet dataSet = params[0];
+
         Log.d(LOGTAG, "SoloAsyncTask RUNNING");
+        Log.e(LOGTAG, "Publishing progress");
 
-        if (!newDataReadyToPublish) {
-
-            Log.e(LOGTAG, "Updating progress bar: " + progress);
-            ProgressBar pb = activityReference.get().findViewById(R.id.progress_bar);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                pb.setProgress(progress, true);
-            }
-        } else {
-
-            Log.e(LOGTAG, "Publishing progress");
-            if (dataSet.getDeals().size() <= 1) {
-                showToast("No profit can be made.\nCheck Internet connection\n" +
-                        "and number of active markets.");
-                return;
-            }
-
-            updateUIData(dataSet);
+        if (dataSet.getDeals().size() <= 1) {
+            showToast("No profit can be made.\nCheck Internet connection\n" +
+                    "and number of active markets.");
+            return;
         }
-    }
 
+        updateUIData(dataSet);
+    }
 }

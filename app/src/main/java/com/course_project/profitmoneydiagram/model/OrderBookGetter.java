@@ -27,6 +27,13 @@ public class OrderBookGetter {
 
     private MarketApi api;
     private Retrofit retrofit;
+    private OrderBookGetterProgressListener progressListener;
+
+
+    public OrderBookGetter(OrderBookGetterProgressListener pl) {
+        this.progressListener = pl;
+    }
+
 
     private BitfinexResponse getBitfinexResponse (int limit, String currencyPair) {
 
@@ -434,21 +441,53 @@ public class OrderBookGetter {
                                                   WeakReference <MainActivity> activityReference,
                                                   String currencyPair) {
 
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(activityReference.get());
+
+        boolean bitfinex = sp.getBoolean("bitfinex", true);
+        boolean cex = sp.getBoolean("cex", true);
+        boolean exmo = sp.getBoolean("exmo", true);
+        boolean gdax = sp.getBoolean("gdax", true);
+
+
+        int exchangeCount = 0;
+        if (bitfinex) exchangeCount++;
+        if (cex) exchangeCount++;
+        if (exmo) exchangeCount++;
+        if (gdax) exchangeCount++;
+
+        //To avoid NullPointerException
+        if (exchangeCount == 0) {
+            exchangeCount++;
+        }
+
+        int processedExchangeCount = 0;
+
         CompiledOrderBook result = new CompiledOrderBook();
 
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(activityReference.get());
         //If this market is set active in settings.
-        if (sp.getBoolean("bitfinex", true)) {
+        if (bitfinex) {
+            processedExchangeCount++;
+            progressListener.updateOrderBookGetterProgress(
+                    Math.round(100*processedExchangeCount/exchangeCount));
             //Add all it's orders into the order book.
             result.addAll(getBitfinexCleanOrderBook(limit, currencyPair));
         }
-        if (sp.getBoolean("cex", true)) {
+        if (cex) {
+            processedExchangeCount++;
+            progressListener.updateOrderBookGetterProgress(
+                    Math.round(100*processedExchangeCount/exchangeCount));
             result.addAll(getCexPartCleanOrderBook(limit, currencyPair));
         }
-        if (sp.getBoolean("exmo", true)) {
+        if (exmo) {
+            processedExchangeCount++;
+            progressListener.updateOrderBookGetterProgress(
+                    Math.round(100*processedExchangeCount/exchangeCount));
             result.addAll(getExmoCleanOrderBook(limit, currencyPair));
         }
-        if (sp.getBoolean("gdax", true)) {
+        if (gdax) {
+            processedExchangeCount++;
+            progressListener.updateOrderBookGetterProgress(
+                    Math.round(100*processedExchangeCount/exchangeCount));
             result.addAll(getGdaxTop50CleanOrderBook(currencyPair));
         }
         /*if (sp.getBoolean("kucoin", true)) {
@@ -459,7 +498,15 @@ public class OrderBookGetter {
         //Asks sorted in ascending order by price.
         result.sort();
 
+        progressListener.updateOrderBookGetterProgress(0);
+
         return result;
+    }
+
+
+    public interface OrderBookGetterProgressListener {
+
+        void updateOrderBookGetterProgress(Integer progress);
     }
 
 }
