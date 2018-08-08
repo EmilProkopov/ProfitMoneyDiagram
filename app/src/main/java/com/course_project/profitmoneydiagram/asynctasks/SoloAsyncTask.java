@@ -303,7 +303,8 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
         long currentTime = Calendar.getInstance().getTimeInMillis();
         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:MM:ss", Locale.US);
         ((TextView)activityReference.get().findViewById(R.id.time_line))
-                .setText(format.format(currentTime));
+                .setText(activityReference.get().getString(R.string.date_time_string,
+                        format.format(currentTime)));
     }
 
 
