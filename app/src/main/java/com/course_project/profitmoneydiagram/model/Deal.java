@@ -41,7 +41,4 @@ public class Deal {
             return marketName;
         }
 
-        public void setMarketName(String marketName) {
-            this.marketName = marketName;
-        }
     }

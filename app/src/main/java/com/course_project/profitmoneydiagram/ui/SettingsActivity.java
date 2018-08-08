@@ -1,8 +1,6 @@
 package com.course_project.profitmoneydiagram.ui;
 
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
