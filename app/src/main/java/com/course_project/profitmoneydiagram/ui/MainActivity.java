@@ -12,35 +12,26 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import com.course_project.profitmoneydiagram.R;
-import com.course_project.profitmoneydiagram.asynctasks.LoggerAsyncTask;
 import com.course_project.profitmoneydiagram.asynctasks.SoloAsyncTask;
 import com.github.mikephil.charting.charts.LineChart;
 
 public class MainActivity extends AppCompatActivity {
 
-    SharedPreferences sp;
-    LoggerAsyncTask loggerAsyncTask;
     SoloAsyncTask soloAsyncTask;
     FloatingActionButton fab;
     ProgressBar pb;
     Boolean paused;
 
     //onClick for settings button.
-    public void onClick1 (View v) {
+    public void onClick1(View v) {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
 
-    public void onClick2 (View v) {
+    public void onClick2(View v) {
 
         paused = !paused;
         if (paused) {
-            Log.d("MainActivity", "Paused");
-            if (loggerAsyncTask != null) {
-                Log.d("MainActivity", "loggerAsyncTask cancelling");
-
-                loggerAsyncTask.cancel(true);
-            }
             if (soloAsyncTask != null) {
                 Log.d("MainActivity", "soloAsyncTask cancelled");
 
@@ -48,14 +39,8 @@ public class MainActivity extends AppCompatActivity {
             }
         } else {
             Log.d("MainActivity", "Played");
-
-            if(sp.getBoolean("extract_data_directly", false)) {
-                Log.d("MainActivity", "soloAsyncTask starting");
-                startSoloAsyncTask();
-            } else {
-                Log.d("MainActivity", "loggerAsyncTask starting");
-                startLoggerAsyncTask();
-            }
+            Log.d("MainActivity", "soloAsyncTask starting");
+            startSoloAsyncTask();
         }
         updateFABandProgressBar();
 
@@ -71,13 +56,7 @@ public class MainActivity extends AppCompatActivity {
         pb.setProgress(0);
     }
 
-    public void startLoggerAsyncTask () {
-
-        loggerAsyncTask = new LoggerAsyncTask(this);
-        loggerAsyncTask.execute();
-    }
-
-    public void startSoloAsyncTask () {
+    public void startSoloAsyncTask() {
 
         soloAsyncTask = new SoloAsyncTask(this);
         soloAsyncTask.execute();
@@ -91,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        loggerAsyncTask = null;
         soloAsyncTask = null;
         paused = false;
 
@@ -101,24 +79,16 @@ public class MainActivity extends AppCompatActivity {
         fab = findViewById(R.id.fab);
         pb = findViewById(R.id.progress_bar);
 
-        sp = PreferenceManager.getDefaultSharedPreferences(this);
-
-        if(sp.getBoolean("extract_data_directly", false)) {
-            startSoloAsyncTask();
-        } else {
-            startLoggerAsyncTask();
-        }
+        startSoloAsyncTask();
 
         updateFABandProgressBar();
     }
 
     @Override
-    protected void onStop () {
+    protected void onStop() {
         Log.d("MainActivity", "ON_STOP");
         super.onStop();
-        if (loggerAsyncTask != null) {
-            loggerAsyncTask.cancel(true);
-        }
+
         if (soloAsyncTask != null) {
             soloAsyncTask.cancel(true);
         }
@@ -126,25 +96,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onRestart () {
+    protected void onRestart() {
         //Cancel previous AsyncTask and start new.
         super.onRestart();
         Log.d("MainActivity", "ON_RESTART");
 
         paused = false;
-        if (loggerAsyncTask != null) {
-            loggerAsyncTask.cancel(true);
-        }
+
         if (soloAsyncTask != null) {
             soloAsyncTask.cancel(true);
         }
 
-        sp = PreferenceManager.getDefaultSharedPreferences(this);
-        if(sp.getBoolean("extract_data_directly", false)) {
-            startSoloAsyncTask();
-        } else {
-            startLoggerAsyncTask();
-        }
+        startSoloAsyncTask();
 
         updateFABandProgressBar();
     }

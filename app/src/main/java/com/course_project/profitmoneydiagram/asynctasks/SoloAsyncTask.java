@@ -2,6 +2,7 @@ package com.course_project.profitmoneydiagram.asynctasks;
 
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -43,6 +44,7 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
 
     private boolean newDataReadyToPublish = true;
     private int progress = 0; //step of progress bar updating
+
 
     public SoloAsyncTask(MainActivity activity) {
 
@@ -232,7 +234,10 @@ public class SoloAsyncTask extends AsyncTask<Void, OutputDataSet, OutputDataSet>
 
             Log.e(LOGTAG, "Updating progress bar: " + progress);
             ProgressBar pb = activityReference.get().findViewById(R.id.progress_bar);
-            pb.setProgress(progress, true);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                pb.setProgress(progress, true);
+            }
         } else {
 
             Log.e(LOGTAG, "Publishing progress");

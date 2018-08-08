@@ -18,14 +18,6 @@
         android:entryValues="@array/currency_pairs"
         android:dialogTitle="Choose the currency pair" />
 
-    <SwitchPreference
-        android:key="extract_data_directly"
-        android:defaultValue="false"
-        android:summaryOff="Extract data using logger"
-        android:summaryOn="Get data directly from markets"
-        android:switchTextOff="logger"
-        android:switchTextOn="markets" />
-
     <ListPreference
         android:key="depth_limit"
         android:title="Limit of bids/asks from one market"
@@ -34,37 +26,31 @@
         android:entries="@array/depth_limits"
         android:entryValues="@array/depth_limits"
         android:dialogTitle="Choose max number of top bids/asks taken from one marketName"
-        android:dependency="extract_data_directly" />
-
+        />
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="bitfinex"
         android:summary="Bitfinex"
-        android:title="Include data from Bitfinex"
-        android:dependency="extract_data_directly" />
+        android:title="Include data from Bitfinex"/>
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="cex"
         android:summary="Cex"
-        android:title="Include data from Cex"
-        android:dependency="extract_data_directly"/>
+        android:title="Include data from Cex"/>
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="exmo"
         android:summary="Exmo"
-        android:title="Include data from Exmo"
-        android:dependency="extract_data_directly"/>
+        android:title="Include data from Exmo"/>
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="gdax"
         android:summary="Gdax"
-        android:title="Include data from Gdax"
-        android:dependency="extract_data_directly"/>
+        android:title="Include data from Gdax"/>
     <CheckBoxPreference
         android:defaultValue="true"
         android:key="kucoin"
         android:summary="Kucoin"
-        android:title="Include data from Kucoin"
-        android:dependency="extract_data_directly"/>
+        android:title="Include data from Kucoin"/>
 
 </android.support.v7.preference.PreferenceScreen>
