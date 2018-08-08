@@ -47,6 +47,7 @@
     <fragment android:name="com.course_project.profitmoneydiagram.ui.SettingsFragment"
         android:id="@+id/settings_fragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_marginTop="8dp"/>
 
 </LinearLayout>
