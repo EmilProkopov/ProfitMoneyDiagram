@@ -355,7 +355,7 @@ public class OrderBookGetter {
     }
 
 
-    private KucoinResponse getKucoinResponseBTCUSTD (int limit, String currencyPair) {
+    /*private KucoinResponse getKucoinResponseBTCUSTD (int limit, String currencyPair) {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.kucoin.com")
@@ -427,7 +427,7 @@ public class OrderBookGetter {
         res.setBids(curBids);
 
         return res;
-    }
+    }*/
 
     //Get Order books from all markets and unite them into one.
     public CompiledOrderBook getCompiledOrderBook(int limit,
@@ -451,9 +451,9 @@ public class OrderBookGetter {
         if (sp.getBoolean("gdax", true)) {
             result.addAll(getGdaxTop50CleanOrderBook(currencyPair));
         }
-        if (sp.getBoolean("kucoin", true)) {
+        /*if (sp.getBoolean("kucoin", true)) {
             result.addAll(getKucoinCleanOrderBook(limit, currencyPair));
-        }
+        }*/
         //Sort the order book.
         //Bids sorted in descending order by price.
         //Asks sorted in ascending order by price.

@@ -47,10 +47,5 @@
         android:key="gdax"
         android:summary="Gdax"
         android:title="Include data from Gdax"/>
-    <CheckBoxPreference
-        android:defaultValue="true"
-        android:key="kucoin"
-        android:summary="Kucoin"
-        android:title="Include data from Kucoin"/>
 
 </android.support.v7.preference.PreferenceScreen>
